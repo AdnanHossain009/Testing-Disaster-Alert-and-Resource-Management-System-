@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -21,7 +20,7 @@
             background-color: #2c3e50;
             color: white;
             padding: 1rem;
-            text-align: center;
+            text-align:center;
         }
 
         .nav {
@@ -56,6 +55,7 @@
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
             border-left: 6px solid;
         }
 
@@ -262,10 +262,9 @@
     <div class="nav">
         <a href="{{ route('dashboard') }}">Dashboard</a>
         <a href="{{ route('alerts.index') }}">All Alerts</a>
-        
-        <a href="#">Shelters</a>
-        <a href="#">Requests</a>
-        <a href="#">Map</a>
+        <a href="{{ route('shelters.index') }}">Shelters</a>
+        <a href="{{ route('requests.create') }}">Emergency Request</a>
+        <a href="{{ route('login') }}">Login</a>
     </div>
 
     <div class="container">
