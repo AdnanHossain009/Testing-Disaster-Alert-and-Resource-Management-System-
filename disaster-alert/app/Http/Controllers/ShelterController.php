@@ -3,69 +3,35 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Shelter;
 
 class ShelterController extends Controller
 {
     /**
-     * Display a listing of shelters
+     * Display a listing of shelters (Public view)
      */
     public function index()
     {
-        // Sample shelter data
-        $shelters = [
-            [
-                'id' => 1,
-                'name' => 'Dhaka Community Center',
-                'location' => 'Dhanmondi, Dhaka',
-                'address' => '15/A Dhanmondi Road, Dhaka-1205',
-                'capacity' => 200,
-                'occupied' => 45,
-                'available' => 155,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area', 'Children Area'],
-                'coordinates' => ['lat' => 23.7465, 'lng' => 90.3784]
-            ],
-            [
-                'id' => 2,
-                'name' => 'Cox\'s Bazar Relief Center',
-                'location' => 'Cox\'s Bazar Sadar',
-                'address' => 'Beach Road, Cox\'s Bazar-4700',
-                'capacity' => 150,
-                'occupied' => 130,
-                'available' => 20,
-                'status' => 'Nearly Full',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area'],
-                'coordinates' => ['lat' => 21.4272, 'lng' => 92.0058]
-            ],
-            [
-                'id' => 3,
-                'name' => 'Chittagong Sports Complex',
-                'location' => 'Chittagong City',
-                'address' => 'GEC Circle, Chittagong-4000',
-                'capacity' => 300,
-                'occupied' => 0,
-                'available' => 300,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area', 'Sports Facilities'],
-                'coordinates' => ['lat' => 22.3569, 'lng' => 91.7832]
-            ],
-            [
-                'id' => 4,
-                'name' => 'Sylhet City Hall',
-                'location' => 'Sylhet City',
-                'address' => 'Zindabazar, Sylhet-3100',
-                'capacity' => 100,
-                'occupied' => 95,
-                'available' => 5,
-                'status' => 'Nearly Full',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area'],
-                'coordinates' => ['lat' => 24.8949, 'lng' => 91.8687]
-            ]
-        ];
+        // Get active shelters from database
+        $shelters = Shelter::active()
+            ->orderBy('name')
+            ->get()
+            ->map(function ($shelter) {
+                return [
+                    'id' => $shelter->id,
+                    'name' => $shelter->name,
+                    'location' => $shelter->city,
+                    'address' => $shelter->address,
+                    'capacity' => $shelter->capacity,
+                    'occupied' => $shelter->current_occupancy,
+                    'available' => $shelter->available_capacity,
+                    'status' => $shelter->availability_status,
+                    'contact' => $shelter->contact_phone,
+                    'facilities' => is_array($shelter->facilities) ? $shelter->facilities : [],
+                    'coordinates' => ['lat' => $shelter->latitude ?? 0, 'lng' => $shelter->longitude ?? 0],
+                    'special_notes' => $shelter->special_notes
+                ];
+            })->toArray();
 
         // Calculate statistics
         $stats = [
@@ -77,6 +43,45 @@ class ShelterController extends Controller
         ];
 
         return view('shelters.index', compact('shelters', 'stats'));
+    }
+
+    /**
+     * Display admin shelter management page
+     */
+    public function adminIndex()
+    {
+        // Get all shelters from database for admin management
+        $shelters = Shelter::orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($shelter) {
+                return [
+                    'id' => $shelter->id,
+                    'name' => $shelter->name,
+                    'location' => $shelter->city,
+                    'address' => $shelter->address,
+                    'capacity' => $shelter->capacity,
+                    'occupied' => $shelter->current_occupancy,
+                    'available' => $shelter->available_capacity,
+                    'status' => $shelter->availability_status,
+                    'contact' => $shelter->contact_phone,
+                    'facilities' => is_array($shelter->facilities) ? $shelter->facilities : [],
+                    'coordinates' => ['lat' => $shelter->latitude ?? 0, 'lng' => $shelter->longitude ?? 0],
+                    'special_notes' => $shelter->special_notes,
+                    'created_at' => $shelter->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $shelter->updated_at->format('Y-m-d H:i:s')
+                ];
+            })->toArray();
+
+        // Calculate statistics for admin dashboard
+        $stats = [
+            'total_shelters' => count($shelters),
+            'available_shelters' => count(array_filter($shelters, fn($s) => $s['status'] === 'Available')),
+            'total_capacity' => array_sum(array_column($shelters, 'capacity')),
+            'total_occupied' => array_sum(array_column($shelters, 'occupied')),
+            'total_available' => array_sum(array_column($shelters, 'available'))
+        ];
+
+        return view('admin.shelters.index', compact('shelters', 'stats'));
     }
 
     /**
@@ -189,5 +194,90 @@ class ShelterController extends Controller
         $stats = $this->index()->getData()['stats'];
 
         return view('shelters.manage', compact('shelters', 'stats'));
+    }
+
+    /**
+     * Show the form for creating a new shelter
+     */
+    public function create()
+    {
+        return view('admin.shelters.create');
+    }
+
+    /**
+     * Store a newly created shelter in storage
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'capacity' => 'required|integer|min:1',
+            'contact_phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'facilities' => 'nullable|array',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'special_notes' => 'nullable|string|max:1000'
+        ]);
+
+        // Set default values
+        $validatedData['current_occupancy'] = 0;
+        $validatedData['is_active'] = true;
+
+        Shelter::create($validatedData);
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter created successfully!');
+    }
+
+    /**
+     * Show the form for editing the specified shelter
+     */
+    public function edit($id)
+    {
+        $shelter = Shelter::findOrFail($id);
+        return view('admin.shelters.edit', compact('shelter'));
+    }
+
+    /**
+     * Update the specified shelter in storage
+     */
+    public function update(Request $request, $id)
+    {
+        $shelter = Shelter::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'capacity' => 'required|integer|min:1',
+            'contact_phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'facilities' => 'nullable|array',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'special_notes' => 'nullable|string|max:1000',
+            'is_active' => 'boolean'
+        ]);
+
+        $shelter->update($validatedData);
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter updated successfully!');
+    }
+
+    /**
+     * Remove the specified shelter from storage
+     */
+    public function destroy($id)
+    {
+        $shelter = Shelter::findOrFail($id);
+        $shelter->delete();
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter deleted successfully!');
     }
 }

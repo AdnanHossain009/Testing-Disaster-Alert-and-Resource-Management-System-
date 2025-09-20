@@ -3,88 +3,61 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Request as EmergencyRequest;
+use App\Models\Shelter;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RequestController extends Controller
 {
     /**
      * Display all citizen requests (Admin view)
      */
-    public function index()
+    public function adminIndex()
     {
-        // Sample citizen requests data
-        $requests = [
-            [
-                'id' => 1,
-                'citizen_name' => 'John Rahman',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Dhanmondi, Dhaka',
-                'emergency_type' => 'Flood',
-                'description' => 'Water level rising rapidly in our area. Need immediate evacuation.',
-                'status' => 'Assigned',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'shelter_id' => 1,
-                'priority' => 'High',
-                'created_at' => '2025-09-12 10:30:00',
-                'assigned_at' => '2025-09-12 10:35:00',
-                'assignment_type' => 'Manual'
-            ],
-            [
-                'id' => 2,
-                'citizen_name' => 'Fatima Khatun',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Old Dhaka',
-                'emergency_type' => 'Building Collapse Risk',
-                'description' => 'Our building has cracks after earthquake. Family of 4 needs shelter.',
-                'status' => 'Pending',
-                'assigned_shelter' => null,
-                'shelter_id' => null,
-                'priority' => 'High',
-                'created_at' => '2025-09-12 11:45:00',
-                'assigned_at' => null,
-                'assignment_type' => null
-            ],
-            [
-                'id' => 3,
-                'citizen_name' => 'Ahmed Hassan',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Chittagong',
-                'emergency_type' => 'Cyclone',
-                'description' => 'Strong winds approaching. Elderly parents need safe shelter.',
-                'status' => 'Auto-Assigned',
-                'assigned_shelter' => 'Chittagong Sports Complex',
-                'shelter_id' => 3,
-                'priority' => 'Medium',
-                'created_at' => '2025-09-12 09:15:00',
-                'assigned_at' => '2025-09-12 09:16:00',
-                'assignment_type' => 'Auto'
-            ],
-            [
-                'id' => 4,
-                'citizen_name' => 'Rashida Begum',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Cox\'s Bazar',
-                'emergency_type' => 'Tsunami Warning',
-                'description' => 'Tsunami alert issued. Need immediate evacuation for 6 family members.',
-                'status' => 'Completed',
-                'assigned_shelter' => 'Cox\'s Bazar Relief Center',
-                'shelter_id' => 2,
-                'priority' => 'Critical',
-                'created_at' => '2025-09-12 06:00:00',
-                'assigned_at' => '2025-09-12 06:02:00',
-                'assignment_type' => 'Manual'
-            ]
-        ];
+        // Get requests from database with relationships
+        $requests = EmergencyRequest::with(['user', 'assignedBy'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($request) {
+                return [
+                    'id' => $request->id,
+                    'citizen_name' => $request->name,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'location' => $request->location,
+                    'emergency_type' => $request->request_type,
+                    'description' => $request->description,
+                    'status' => $request->status,
+                    'urgency' => $request->urgency,
+                    'people_count' => $request->people_count,
+                    'special_needs' => $request->special_needs,
+                    'created_at' => $request->created_at->format('Y-m-d H:i:s'),
+                    'assigned_at' => $request->assigned_at ? $request->assigned_at->format('Y-m-d H:i:s') : null,
+                    'assigned_by_name' => $request->assignedBy ? $request->assignedBy->name : null,
+                    'priority' => $request->urgency, // Map urgency to priority for consistency
+                    'assigned_shelter' => null, // TODO: Implement shelter assignment
+                    'shelter_id' => null,
+                    'assignment_type' => $request->assigned_at ? 'Manual' : null
+                ];
+            })->toArray();
 
         // Calculate statistics
         $stats = [
-            'total_requests' => count($requests),
-            'pending_requests' => count(array_filter($requests, fn($r) => $r['status'] === 'Pending')),
-            'assigned_requests' => count(array_filter($requests, fn($r) => in_array($r['status'], ['Assigned', 'Auto-Assigned']))),
-            'completed_requests' => count(array_filter($requests, fn($r) => $r['status'] === 'Completed')),
-            'auto_assignments' => count(array_filter($requests, fn($r) => $r['assignment_type'] === 'Auto'))
+            'total_requests' => EmergencyRequest::count(),
+            'pending_requests' => EmergencyRequest::where('status', 'Pending')->count(),
+            'assigned_requests' => EmergencyRequest::whereIn('status', ['Assigned', 'In Progress'])->count(),
+            'completed_requests' => EmergencyRequest::where('status', 'Completed')->count(),
+            'critical_urgent' => EmergencyRequest::whereIn('urgency', ['Critical', 'High'])->count()
         ];
 
-        return view('requests.index', compact('requests', 'stats'));
+        // Get available shelters for assignment
+        $shelters = Shelter::where('status', 'active')
+            ->where('current_occupancy', '<', DB::raw('capacity'))
+            ->get();
+
+        return view('admin.requests.index', compact('requests', 'stats', 'shelters'));
     }
 
     /**
@@ -100,40 +73,77 @@ class RequestController extends Controller
      */
     public function store(Request $request)
     {
-        // In real app, this would save to database
-        // For now, simulate the auto-assignment process
-        
-        $citizenData = [
-            'name' => $request->input('name'),
-            'phone' => $request->input('phone'),
-            'location' => $request->input('location'),
-            'emergency_type' => $request->input('emergency_type'),
-            'description' => $request->input('description'),
-            'family_size' => $request->input('family_size', 1)
-        ];
+        // Validate the request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'location' => 'required|string|max:255',
+            'emergency_type' => 'required|string|in:Shelter,Medical,Food,Water,Rescue,Other',
+            'description' => 'required|string|max:1000',
+            'family_size' => 'nullable|integer|min:1|max:50',
+            'special_needs' => 'nullable|string|max:500'
+        ]);
+
+        // Get current user or create a guest user entry
+        $userId = Auth::id();
+        if (!$userId) {
+            // For guests, we'll use user_id = 1 (assuming there's a system user)
+            // In production, you might want to create a guest user or handle this differently
+            $userId = 1;
+        }
+
+        // Get coordinates from location (optional)
+        $coordinates = $this->getCoordinatesFromLocation($request->input('location'));
+
+        // Create the emergency request
+        $emergencyRequest = EmergencyRequest::create([
+            'user_id' => $userId,
+            'name' => $validatedData['name'],
+            'phone' => $validatedData['phone'],
+            'email' => $validatedData['email'] ?? null,
+            'request_type' => $validatedData['emergency_type'],
+            'description' => $validatedData['description'],
+            'location' => $validatedData['location'],
+            'latitude' => $coordinates['lat'] ?? null,
+            'longitude' => $coordinates['lng'] ?? null,
+            'people_count' => $validatedData['family_size'] ?? 1,
+            'special_needs' => $validatedData['special_needs'] ?? null,
+            'urgency' => $this->determineUrgency($validatedData['emergency_type']),
+            'status' => 'Pending'
+        ]);
 
         // Simulate admin availability check
         $adminOnline = $this->checkAdminAvailability();
         
-        if ($adminOnline) {
-            // Admin is online - manual assignment will be done
-            $status = 'Pending';
-            $assignmentType = 'Manual';
-            $message = 'Your request has been submitted. An admin will assign you a shelter shortly.';
-        } else {
-            // Admin offline - auto-assign nearest shelter
+        $status = 'Pending';
+        $assignmentType = 'Manual';
+        $message = 'Your emergency request has been submitted successfully. Request ID: #' . $emergencyRequest->id . '. An admin will review and assign assistance shortly.';
+        
+        if (!$adminOnline) {
+            // Admin offline - try auto-assignment
             $nearestShelter = $this->autoAssignShelter($request->input('location'));
-            $status = $nearestShelter ? 'Auto-Assigned' : 'Pending';
-            $assignmentType = 'Auto';
-            $message = $nearestShelter 
-                ? 'Auto-assigned to ' . $nearestShelter['name'] . '. Please proceed immediately.'
-                : 'No available shelters found. Your request is pending manual review.';
+            if ($nearestShelter) {
+                $emergencyRequest->update([
+                    'status' => 'Assigned',
+                    'assigned_at' => now()
+                ]);
+                $status = 'Auto-Assigned';
+                $assignmentType = 'Auto';
+                $message = 'Auto-assigned to ' . $nearestShelter['name'] . '. Please proceed immediately. Request ID: #' . $emergencyRequest->id;
+            }
         }
 
-        // Simulate saving request
-        $requestId = rand(100, 999);
+        $citizenData = [
+            'name' => $emergencyRequest->name,
+            'phone' => $emergencyRequest->phone,
+            'location' => $emergencyRequest->location,
+            'emergency_type' => $emergencyRequest->request_type,
+            'description' => $emergencyRequest->description,
+            'family_size' => $emergencyRequest->people_count
+        ];
 
-        return view('requests.success', compact('requestId', 'status', 'message', 'citizenData'));
+        return view('requests.success', compact('emergencyRequest', 'status', 'message', 'citizenData'))->with('requestId', $emergencyRequest->id);
     }
 
     /**
@@ -141,34 +151,101 @@ class RequestController extends Controller
      */
     public function show($id)
     {
-        // Sample request data
-        $requests = [
-            1 => [
-                'id' => 1,
-                'citizen_name' => 'John Rahman',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Dhanmondi, Dhaka',
-                'emergency_type' => 'Flood',
-                'description' => 'Water level rising rapidly in our area. Need immediate evacuation for family of 3.',
-                'status' => 'Assigned',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'shelter_id' => 1,
-                'priority' => 'High',
-                'family_size' => 3,
-                'created_at' => '2025-09-12 10:30:00',
-                'assigned_at' => '2025-09-12 10:35:00',
-                'assignment_type' => 'Manual',
-                'admin_notes' => 'Verified emergency situation. Family safely relocated.'
-            ]
-        ];
+        // Get request from database
+        $emergencyRequest = EmergencyRequest::with(['user', 'assignedBy'])->find($id);
 
-        $request = $requests[$id] ?? null;
-
-        if (!$request) {
+        if (!$emergencyRequest) {
             abort(404, 'Request not found');
         }
 
+        // Format data for view compatibility
+        $request = [
+            'id' => $emergencyRequest->id,
+            'citizen_name' => $emergencyRequest->name,
+            'phone' => $emergencyRequest->phone,
+            'email' => $emergencyRequest->email,
+            'location' => $emergencyRequest->location,
+            'emergency_type' => $emergencyRequest->request_type,
+            'description' => $emergencyRequest->description,
+            'status' => $emergencyRequest->status,
+            'urgency' => $emergencyRequest->urgency,
+            'priority' => $emergencyRequest->urgency, // Map urgency to priority
+            'people_count' => $emergencyRequest->people_count,
+            'family_size' => $emergencyRequest->people_count, // Compatibility
+            'special_needs' => $emergencyRequest->special_needs,
+            'created_at' => $emergencyRequest->created_at->format('Y-m-d H:i:s'),
+            'assigned_at' => $emergencyRequest->assigned_at ? $emergencyRequest->assigned_at->format('Y-m-d H:i:s') : null,
+            'assigned_by_name' => $emergencyRequest->assignedBy ? $emergencyRequest->assignedBy->name : null,
+            'assignment_type' => $emergencyRequest->assigned_at ? 'Manual' : null,
+            'admin_notes' => $emergencyRequest->admin_notes,
+            'assigned_shelter' => null, // TODO: Implement shelter assignment
+            'shelter_id' => null
+        ];
+
         return view('requests.show', compact('request'));
+    }
+
+    /**
+     * Show assignment form for a request
+     */
+    public function assign($id)
+    {
+        $emergencyRequest = EmergencyRequest::findOrFail($id);
+        
+        // Get available shelters
+        $shelters = Shelter::where('status', 'active')
+            ->where('current_occupancy', '<', DB::raw('capacity'))
+            ->get();
+
+        return view('admin.requests.assign', compact('emergencyRequest', 'shelters'));
+    }
+
+    /**
+     * Store shelter assignment for a request
+     */
+    public function storeAssignment(Request $request, $id)
+    {
+        $request->validate([
+            'shelter_id' => 'required|exists:shelters,id',
+            'admin_notes' => 'nullable|string|max:1000'
+        ]);
+
+        $emergencyRequest = EmergencyRequest::findOrFail($id);
+        $shelter = Shelter::findOrFail($request->shelter_id);
+
+        // Check if shelter has capacity
+        if ($shelter->current_occupancy >= $shelter->capacity) {
+            return back()->with('error', 'Selected shelter is at full capacity.');
+        }
+
+        // Update the request
+        $emergencyRequest->update([
+            'status' => 'Assigned',
+            'assigned_at' => now(),
+            'assigned_by' => Auth::id() ?? 1, // Use current admin or fallback
+            'admin_notes' => $request->admin_notes
+        ]);
+
+        // Update shelter occupancy
+        $shelter->increment('current_occupancy', $emergencyRequest->people_count);
+
+        // Create assignment record (if Assignment model exists)
+        try {
+            if (class_exists('\App\Models\Assignment')) {
+                \App\Models\Assignment::create([
+                    'request_id' => $emergencyRequest->id,
+                    'shelter_id' => $shelter->id,
+                    'assigned_by' => Auth::id() ?? 1,
+                    'assigned_at' => now(),
+                    'status' => 'Assigned'
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Assignment model might not exist, continue without error
+        }
+
+        return redirect()->route('admin.requests')
+            ->with('success', "Request #{$emergencyRequest->id} assigned to {$shelter->name} successfully!");
     }
 
     /**
@@ -195,6 +272,23 @@ class RequestController extends Controller
         ];
 
         return view('requests.citizen-dashboard', compact('myRequests'));
+    }
+
+    /**
+     * Determine urgency based on emergency type
+     */
+    private function determineUrgency($emergencyType)
+    {
+        $urgencyMap = [
+            'Rescue' => 'Critical',
+            'Medical' => 'High',
+            'Shelter' => 'High',
+            'Water' => 'Medium',
+            'Food' => 'Medium',
+            'Other' => 'Low'
+        ];
+
+        return $urgencyMap[$emergencyType] ?? 'Medium';
     }
 
     /**
