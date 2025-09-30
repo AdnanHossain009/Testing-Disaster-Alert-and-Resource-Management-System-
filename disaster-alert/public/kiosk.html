@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কমিউনিটি কিয়স্ক - দুর্যোগ ব্যবস্থাপনা</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .kiosk-header {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .kiosk-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .kiosk-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-card {
+            min-height: 300px;
+        }
+
+        .alert-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .alert-high { border-left-color: #ef4444; }
+        .alert-medium { border-left-color: #f59e0b; }
+        .alert-low { border-left-color: #22c55e; }
+
+        .alert-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .alert-meta {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .shelter-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shelter-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .shelter-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .capacity-badge {
+            background: rgba(34, 197, 94, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .capacity-badge.full {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        .capacity-badge.limited {
+            background: rgba(245, 158, 11, 0.8);
+        }
+
+        .emergency-contacts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .contact-item {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .contact-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fecaca;
+            margin-top: 5px;
+        }
+
+        .instructions {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .instructions h3 {
+            color: #bbf7d0;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .qr-code {
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            color: #1e40af;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            background: #f3f4f6;
+            border: 2px dashed #6b7280;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 3rem;
+        }
+
+        .time-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kiosk-header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .emergency-contacts {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="kiosk-header">
+        <h1>🚨 কমিউনিটি দুর্যোগ তথ্য কেন্দ্র</h1>
+        <p>বাংলাদেশ দুর্যোগ ব্যবস্থাপনা সিস্টেম - স্থানীয় নেটওয়ার্ক</p>
+    </div>
+
+    <div class="main-content">
+        <div class="left-panel">
+            <!-- Current Alerts -->
+            <div class="card alert-card">
+                <h2>📢 বর্তমান সতর্কবার্তা</h2>
+                <div id="current-alerts">
+                    <div class="alert-item alert-high">
+                        <div class="alert-title">বন্যার সতর্কবার্তা - ঢাকা</div>
+                        <div class="alert-meta">
+                            <span>তীব্রতা: উচ্চ</span>
+                            <span>২ ঘন্টা আগে</span>
+                        </div>
+                    </div>
+                    <div class="alert-item alert-medium">
+                        <div class="alert-title">ভারী বৃষ্টির সম্ভাবনা - চট্টগ্রাম</div>
+                        <div class="alert-meta">
+                            <span>তীব্রতা: মাঝারি</span>
+                            <span>৪ ঘন্টা আগে</span>
+                        </div>
+                    </div>
+                    <div class="alert-item alert-low">
+                        <div class="alert-title">আবহাওয়া স্বাভাবিক - সিলেট</div>
+                        <div class="alert-meta">
+                            <span>তীব্রতা: নিম্ন</span>
+                            <span>৬ ঘন্টা আগে</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Safety Instructions -->
+            <div class="card">
+                <h2>🛡️ নিরাপত্তা নির্দেশনা</h2>
+                <div class="instructions">
+                    <h3>বন্যার সময় করণীয়:</h3>
+                    <ul>
+                        <li>উঁচু স্থানে আশ্রয় নিন</li>
+                        <li>বিদ্যুৎ সংযোগ বিচ্ছিন্ন করুন</li>
+                        <li>পানি ও খাবার সংরক্ষণ করুন</li>
+                        <li>স্থানীয় কর্তৃপক্ষের নির্দেশ মেনে চলুন</li>
+                        <li>জরুরি যোগাযোগের জন্য ৯৯৯ নম্বরে কল করুন</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <!-- Available Shelters -->
+            <div class="card">
+                <h2>🏠 উপলব্ধ আশ্রয়কেন্দ্র</h2>
+                <div id="shelter-list">
+                    <div class="shelter-item">
+                        <div class="shelter-info">
+                            <h4>ঢাকা কমিউনিটি সেন্টার</h4>
+                            <p>ধানমন্ডি, ঢাকা - ০১৭XXXXXXXX</p>
+                        </div>
+                        <div class="capacity-badge">৮০/১০০</div>
+                    </div>
+                    <div class="shelter-item">
+                        <div class="shelter-info">
+                            <h4>চট্টগ্রাম স্পোর্টস কমপ্লেক্স</h4>
+                            <p>আগ্রাবাদ, চট্টগ্রাম - ০১৮XXXXXXXX</p>
+                        </div>
+                        <div class="capacity-badge limited">৯৫/১০০</div>
+                    </div>
+                    <div class="shelter-item">
+                        <div class="shelter-info">
+                            <h4>সিলেট সিটি কর্পোরেশন</h4>
+                            <p>জিন্দাবাজার, সিলেট - ০১৯XXXXXXXX</p>
+                        </div>
+                        <div class="capacity-badge">৪৫/১৫০</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div class="card">
+                <h2>📞 জরুরি যোগাযোগ</h2>
+                <div class="emergency-contacts">
+                    <div class="contact-item">
+                        <div>🚑 জাতীয় জরুরি</div>
+                        <div class="contact-number">৯৯৯</div>
+                    </div>
+                    <div class="contact-item">
+                        <div>🚓 পুলিশ</div>
+                        <div class="contact-number">১০০</div>
+                    </div>
+                    <div class="contact-item">
+                        <div>🔥 ফায়ার সার্ভিস</div>
+                        <div class="contact-number">৯৫৫৫৫৫৫</div>
+                    </div>
+                    <div class="contact-item">
+                        <div>🏥 স্বাস্থ্য জরুরি</div>
+                        <div class="contact-number">১৬২৬৩</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code for Mobile Access -->
+            <div class="card qr-code">
+                <h2>📱 মোবাইল অ্যাক্সেস</h2>
+                <div class="qr-placeholder">📱</div>
+                <p><strong>QR কোড স্ক্যান করুন</strong></p>
+                <p>আপনার মোবাইলে সম্পূর্ণ সিস্টেম অ্যাক্সেস করুন</p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">
+                    <strong>URL:</strong> disaster-alert.gov.bd
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="connection-status">
+            <div class="status-dot" id="connection-dot"></div>
+            <span id="connection-text">স্থানীয় নেটওয়ার্ক সংযুক্ত</span>
+        </div>
+        <div class="time-display" id="current-time"></div>
+        <div>কিয়স্ক ID: BD-KIOSK-001</div>
+    </div>
+
+    <script>
+        // Update time every second
+        function updateTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            
+            document.getElementById('current-time').textContent = 
+                now.toLocaleDateString('bn-BD', options);
+        }
+
+        // Check connection status
+        function checkConnection() {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            
+            if (navigator.onLine) {
+                dot.classList.remove('offline');
+                text.textContent = 'অনলাইন - কেন্দ্রীয় সার্ভারের সাথে সংযুক্ত';
+            } else {
+                dot.classList.add('offline');
+                text.textContent = 'অফলাইন - স্থানীয় ডেটা ব্যবহার করা হচ্ছে';
+            }
+        }
+
+        // Auto-refresh data every 30 seconds
+        function refreshData() {
+            console.log('Refreshing kiosk data...');
+            
+            // In a real implementation, this would fetch fresh data
+            // For now, just update the timestamp
+            checkConnection();
+        }
+
+        // Initialize
+        updateTime();
+        checkConnection();
+        setInterval(updateTime, 1000);
+        setInterval(refreshData, 30000);
+
+        // Listen for online/offline events
+        window.addEventListener('online', checkConnection);
+        window.addEventListener('offline', checkConnection);
+
+        // Auto-reload page every hour to get fresh data
+        setTimeout(() => {
+            window.location.reload();
+        }, 3600000); // 1 hour
+
+        // Touch screen optimization
+        document.addEventListener('touchstart', function(e) {
+            // Prevent zoom on double-tap
+            e.preventDefault();
+        }, { passive: false });
+
+        // Simulate QR code generation (in real implementation, this would be dynamic)
+        function generateQRCode() {
+            // This would integrate with a QR code library
+            console.log('QR code would be generated for: ' + window.location.origin);
+        }
+
+        generateQRCode();
+    </script>
+</body>
+</html>

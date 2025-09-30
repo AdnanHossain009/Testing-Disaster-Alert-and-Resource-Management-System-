@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Bangladesh Disaster Alert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .offline-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .offline-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #e2e8f0;
+            font-weight: 300;
+        }
+
+        .offline-message {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #cbd5e1;
+        }
+
+        .offline-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #1e40af;
+        }
+
+        .btn-primary:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .emergency-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .emergency-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fecaca;
+        }
+
+        .emergency-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 5px 0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .cached-data {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            .offline-title {
+                font-size: 2rem;
+            }
+            
+            .offline-icon {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Network Unavailable</span>
+        </div>
+        
+        <h1 class="offline-title">No Internet Connection</h1>
+        <p class="offline-subtitle">Disaster Management System - Offline Mode</p>
+        
+        <div class="offline-message">
+            <p>You're currently offline, but essential disaster information is still available through cached data and emergency contacts.</p>
+        </div>
+
+        <div class="offline-actions">
+            <button onclick="checkConnection()" class="btn btn-primary">
+                🔄 Check Connection
+            </button>
+            <button onclick="viewCachedAlerts()" class="btn btn-secondary">
+                📢 View Cached Alerts
+            </button>
+            <button onclick="submitOfflineRequest()" class="btn btn-secondary">
+                🆘 Submit Emergency Request (Offline)
+            </button>
+        </div>
+
+        <div class="emergency-info">
+            <div class="emergency-title">🚨 Emergency Contacts (Works Offline)</div>
+            <div class="emergency-number">📞 National Emergency: 999</div>
+            <div class="emergency-number">🚑 Fire Service: 9555555</div>
+            <div class="emergency-number">🚓 Police: 100</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: #cbd5e1;">
+                SMS: Send "HELP" to 16263 for assistance
+            </div>
+        </div>
+
+        <div class="cached-data">
+            <strong>✅ Available Offline:</strong><br>
+            • Last downloaded disaster alerts<br>
+            • Emergency shelter locations<br>
+            • Emergency contact numbers<br>
+            • Basic safety instructions
+        </div>
+    </div>
+
+    <script>
+        // Check network connection
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                alert('Still offline. Please check your internet connection.');
+            }
+        }
+
+        // View cached alerts
+        function viewCachedAlerts() {
+            // Try to navigate to alerts page (will serve cached version)
+            window.location.href = '/alerts';
+        }
+
+        // Submit offline emergency request
+        function submitOfflineRequest() {
+            // Create offline emergency request form
+            const offlineForm = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 100%; color: #333;">
+                        <h3 style="margin-bottom: 20px; color: #1e40af;">Emergency Request (Offline)</h3>
+                        <form id="offlineRequestForm">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+                                <input type="text" name="name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Phone:</label>
+                                <input type="tel" name="phone" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Location:</label>
+                                <input type="text" name="location" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Emergency Type:</label>
+                                <select name="emergency_type" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                    <option value="">Select Emergency</option>
+                                    <option value="Flood">Flood</option>
+                                    <option value="Fire">Fire</option>
+                                    <option value="Medical">Medical Emergency</option>
+                                    <option value="Shelter">Need Shelter</option>
+                                    <option value="Food">Food/Water</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
+                                <textarea name="description" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" style="flex: 1; padding: 12px; background: #1e40af; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                    💾 Save Offline Request
+                                </button>
+                                <button type="button" onclick="closeOfflineForm()" style="flex: 1; padding: 12px; background: #6b7280; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        </form>
+                        <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-radius: 5px; font-size: 0.9rem;">
+                            ℹ️ Request will be automatically submitted when internet connection is restored.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', offlineForm);
+            
+            // Handle form submission
+            document.getElementById('offlineRequestForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const requestData = {
+                    id: Date.now(),
+                    name: formData.get('name'),
+                    phone: formData.get('phone'),
+                    location: formData.get('location'),
+                    emergency_type: formData.get('emergency_type'),
+                    description: formData.get('description'),
+                    timestamp: new Date().toISOString(),
+                    status: 'offline_pending'
+                };
+                
+                // Store in localStorage for offline use
+                const offlineRequests = JSON.parse(localStorage.getItem('offlineRequests') || '[]');
+                offlineRequests.push(requestData);
+                localStorage.setItem('offlineRequests', JSON.stringify(offlineRequests));
+                
+                alert('✅ Emergency request saved offline!\n\nIt will be automatically submitted when internet connection is restored.\n\nRequest ID: ' + requestData.id);
+                closeOfflineForm();
+            });
+        }
+
+        function closeOfflineForm() {
+            const form = document.querySelector('[style*="position: fixed"]');
+            if (form) {
+                form.remove();
+            }
+        }
+
+        // Listen for online event
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+
+        // Auto-check connection every 30 seconds
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
