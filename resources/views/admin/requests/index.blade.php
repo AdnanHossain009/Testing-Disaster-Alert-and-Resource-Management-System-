@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Requests</title>
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
@@ -46,6 +48,30 @@
         .modal-content { background-color: white; margin: 15% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 500px; }
         .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close:hover { color: black; }
+        
+        /* Map Integration Styles */
+        .map-section { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; overflow: hidden; }
+        .map-header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; text-align: center; }
+        .map-header h3 { margin: 0; font-size: 1.5rem; }
+        .map-controls { background: #f8f9fa; padding: 1rem; border-bottom: 1px solid #e9ecef; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .map-filter { display: flex; align-items: center; gap: 0.5rem; }
+        .map-filter label { font-weight: 600; color: #495057; }
+        .map-filter select { padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; }
+        #requests-map { height: 400px; width: 100%; }
+        .view-toggle { display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
+        .toggle-btn { padding: 0.75rem 1.5rem; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+        .toggle-btn.active { background: #667eea; color: white; }
+        .toggle-btn:hover { background: #5a67d8; color: white; border-color: #5a67d8; }
+        .priority-legend { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .legend-marker { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .legend-marker.critical { background: #e53e3e; }
+        .legend-marker.high { background: #ed8936; }
+        .legend-marker.medium { background: #4299e1; }
+        .legend-marker.low { background: #48bb78; }
+        .legend-marker.pending { background: #ecc94b; }
+        .legend-marker.assigned { background: #9f7aea; }
+        .legend-marker.completed { background: #38b2ac; }
     </style>
 </head>
 <body>
@@ -105,6 +131,92 @@
             </div>
         </div>
 
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <a href="#" class="toggle-btn active" id="map-view-btn">🗺️ Geographic View</a>
+            <a href="#" class="toggle-btn" id="table-view-btn">📋 Table View</a>
+        </div>
+
+        <!-- Geographic Request Map -->
+        <div class="map-section" id="map-section">
+            <div class="map-header">
+                <h3>🗺️ Emergency Requests Geographic View</h3>
+                <p>Visualize request locations and assign to nearest shelters</p>
+            </div>
+            
+            <div class="map-controls">
+                <div class="map-filter">
+                    <label>Filter by Status:</label>
+                    <select id="status-filter">
+                        <option value="all">All Requests</option>
+                        <option value="pending">Pending</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="map-filter">
+                    <label>Filter by Priority:</label>
+                    <select id="priority-filter">
+                        <option value="all">All Priorities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                
+                <div class="map-filter">
+                    <button id="show-shelters" class="btn btn-primary">🏠 Show Shelters</button>
+                    <button id="hide-shelters" class="btn btn-secondary" style="display: none;">🏠 Hide Shelters</button>
+                </div>
+            </div>
+            
+            <div id="requests-map"></div>
+        </div>
+
+        <!-- Map Legend -->
+        <div class="priority-legend" id="map-legend">
+            <h4>🏷️ Map Legend</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <h5>By Priority:</h5>
+                    <div class="legend-item">
+                        <div class="legend-marker critical"></div>
+                        <span>Critical Priority</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker high"></div>
+                        <span>High Priority</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker medium"></div>
+                        <span>Medium Priority</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker low"></div>
+                        <span>Low Priority</span>
+                    </div>
+                </div>
+                <div>
+                    <h5>By Status:</h5>
+                    <div class="legend-item">
+                        <div class="legend-marker pending"></div>
+                        <span>Pending Requests</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker assigned"></div>
+                        <span>Assigned Requests</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker completed"></div>
+                        <span>Completed Requests</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Bulk Actions -->
         <div class="bulk-actions">
             <h3>📦 Bulk Operations</h3>
@@ -129,7 +241,7 @@
             </form>
         </div>
 
-        <div class="requests-table">
+        <div class="requests-table" id="requests-table">
             <table>
                 <thead>
                     <tr>
@@ -219,7 +331,338 @@
         </div>
     </div>
 
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Request and Shelter data for mapping
+        const requests = @json($helpRequests->items());
+        const availableShelters = @json($availableShelters ?? []);
+        
+        // Initialize map
+        let map;
+        let requestMarkers = [];
+        let shelterMarkers = [];
+        let sheltersVisible = false;
+        
+        function initRequestMap() {
+            // Center map on first request or default location (Dhaka, Bangladesh)
+            const centerLat = requests.length > 0 ? (requests[0].latitude || 23.8103) : 23.8103;
+            const centerLng = requests.length > 0 ? (requests[0].longitude || 90.4125) : 90.4125;
+            
+            map = L.map('requests-map').setView([centerLat, centerLng], 11);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Add request markers
+            addRequestMarkers();
+        }
+        
+        function addRequestMarkers() {
+            requestMarkers = [];
+            
+            requests.forEach(request => {
+                // Generate coordinates if not available (simulate real locations around city)
+                const lat = request.latitude || (23.8103 + (Math.random() - 0.5) * 0.2);
+                const lng = request.longitude || (90.4125 + (Math.random() - 0.5) * 0.2);
+                
+                // Determine marker color based on priority and status
+                let markerColor = '#4299e1'; // Default medium priority
+                let borderColor = '#ecc94b'; // Default pending status
+                
+                // Priority colors
+                switch(request.urgency?.toLowerCase()) {
+                    case 'critical':
+                        markerColor = '#e53e3e';
+                        break;
+                    case 'high':
+                        markerColor = '#ed8936';
+                        break;
+                    case 'medium':
+                        markerColor = '#4299e1';
+                        break;
+                    case 'low':
+                        markerColor = '#48bb78';
+                        break;
+                }
+                
+                // Status border colors
+                switch(request.status?.toLowerCase()) {
+                    case 'pending':
+                        borderColor = '#ecc94b';
+                        break;
+                    case 'assigned':
+                        borderColor = '#9f7aea';
+                        break;
+                    case 'in progress':
+                        borderColor = '#4299e1';
+                        break;
+                    case 'completed':
+                        borderColor = '#38b2ac';
+                        break;
+                }
+                
+                // Create custom marker icon
+                const markerIcon = L.divIcon({
+                    className: 'custom-request-marker',
+                    html: `<div style="
+                        background-color: ${markerColor};
+                        width: 25px;
+                        height: 25px;
+                        border-radius: 50%;
+                        border: 4px solid ${borderColor};
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                        font-size: 10px;
+                    ">${request.people_count || '1'}</div>`,
+                    iconSize: [33, 33],
+                    iconAnchor: [16, 16]
+                });
+                
+                // Create marker
+                const marker = L.marker([lat, lng], { icon: markerIcon })
+                    .bindPopup(createRequestPopupContent(request))
+                    .addTo(map);
+                
+                marker.requestData = request;
+                marker.priorityClass = request.urgency?.toLowerCase() || 'medium';
+                marker.statusClass = request.status?.toLowerCase().replace(' ', '-') || 'pending';
+                requestMarkers.push(marker);
+                
+                // Add click event to highlight corresponding row
+                marker.on('click', function() {
+                    highlightRequestRow(request.id);
+                });
+            });
+        }
+        
+        function addShelterMarkers() {
+            shelterMarkers = [];
+            
+            availableShelters.forEach(shelter => {
+                // Generate coordinates if not available
+                const lat = shelter.latitude || (23.8103 + (Math.random() - 0.5) * 0.15);
+                const lng = shelter.longitude || (90.4125 + (Math.random() - 0.5) * 0.15);
+                
+                // Determine marker color based on capacity
+                const occupancyPercentage = (shelter.current_occupancy / shelter.capacity) * 100;
+                let markerColor = '#27ae60'; // Available (green)
+                
+                if (shelter.status !== 'Active') {
+                    markerColor = '#95a5a6'; // Inactive (gray)
+                } else if (occupancyPercentage >= 90) {
+                    markerColor = '#e74c3c'; // Full (red)
+                } else if (occupancyPercentage >= 70) {
+                    markerColor = '#f39c12'; // Nearly full (orange)
+                }
+                
+                // Create shelter marker icon (house shape)
+                const shelterIcon = L.divIcon({
+                    className: 'custom-shelter-marker',
+                    html: `<div style="
+                        background-color: ${markerColor};
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 4px;
+                        border: 3px solid white;
+                        box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                        font-size: 16px;
+                        transform: rotate(45deg);
+                    ">🏠</div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18]
+                });
+                
+                // Create marker
+                const marker = L.marker([lat, lng], { icon: shelterIcon })
+                    .bindPopup(createShelterPopupContent(shelter));
+                
+                marker.shelterData = shelter;
+                shelterMarkers.push(marker);
+            });
+        }
+        
+        function createRequestPopupContent(request) {
+            const priorityBadge = getPriorityBadge(request.urgency);
+            const statusBadge = getStatusBadge(request.status);
+            const assignedShelter = request.assignment ? request.assignment.shelter.name : 'Not Assigned';
+            
+            return `
+                <div style="min-width: 280px;">
+                    <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📋 Request #${request.id}</h4>
+                    <p style="margin: 5px 0; color: #7f8c8d;"><strong>👤 Citizen:</strong> ${request.name}</p>
+                    <p style="margin: 5px 0; color: #7f8c8d;"><strong>📞 Contact:</strong> ${request.phone}</p>
+                    <p style="margin: 5px 0; color: #7f8c8d;"><strong>📍 Location:</strong> ${request.location}</p>
+                    <p style="margin: 5px 0;"><strong>🚨 Type:</strong> ${request.request_type}</p>
+                    <p style="margin: 5px 0;"><strong>👥 People:</strong> ${request.people_count || 1} person(s)</p>
+                    <p style="margin: 5px 0;">${priorityBadge} ${statusBadge}</p>
+                    <p style="margin: 5px 0; color: #7f8c8d;"><strong>🏠 Assigned Shelter:</strong> ${assignedShelter}</p>
+                    <p style="margin: 5px 0; color: #7f8c8d; font-size: 12px;"><strong>📅 Created:</strong> ${new Date(request.created_at).toLocaleString()}</p>
+                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                        ${request.status === 'Pending' ? 
+                            `<a href="/admin/requests/${request.id}/assign" style="background: #9f7aea; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 12px;">📋 Assign</a>` : 
+                            ''
+                        }
+                        <button onclick="showStatusModal(${request.id}, '${request.status}')" style="background: #38b2ac; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">🔄 Status</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createShelterPopupContent(shelter) {
+            const occupancyPercentage = Math.round((shelter.current_occupancy / shelter.capacity) * 100);
+            const statusBadge = shelter.status === 'Active' ? 
+                (occupancyPercentage >= 90 ? '🔴 Full' : 
+                 occupancyPercentage >= 70 ? '🟡 Nearly Full' : '🟢 Available') :
+                '⚪ Inactive';
+            
+            return `
+                <div style="min-width: 260px;">
+                    <h4 style="margin: 0 0 10px 0; color: #2c3e50;">🏠 ${shelter.name}</h4>
+                    <p style="margin: 5px 0; color: #7f8c8d;">📍 ${shelter.location}</p>
+                    <p style="margin: 5px 0; color: #7f8c8d;">📞 ${shelter.contact}</p>
+                    <p style="margin: 5px 0; font-weight: bold;">${statusBadge}</p>
+                    <p style="margin: 5px 0;">
+                        <strong>Capacity:</strong> ${shelter.current_occupancy}/${shelter.capacity} 
+                        (${shelter.capacity - shelter.current_occupancy} available)
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <strong>Facilities:</strong> ${Array.isArray(shelter.facilities) ? shelter.facilities.join(', ') : 'N/A'}
+                    </p>
+                    <div style="margin-top: 10px;">
+                        <a href="/admin/shelters/${shelter.id}/edit" style="background: #3498db; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px;">✏️ Edit</a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getPriorityBadge(priority) {
+            const colors = {
+                'Critical': '#e53e3e',
+                'High': '#ed8936',
+                'Medium': '#4299e1',
+                'Low': '#48bb78'
+            };
+            const color = colors[priority] || colors['Medium'];
+            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">🔥 ${priority || 'Medium'}</span>`;
+        }
+        
+        function getStatusBadge(status) {
+            const colors = {
+                'Pending': '#ecc94b',
+                'Assigned': '#9f7aea',
+                'In Progress': '#4299e1',
+                'Completed': '#38b2ac',
+                'Cancelled': '#e53e3e'
+            };
+            const color = colors[status] || colors['Pending'];
+            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">📊 ${status || 'Pending'}</span>`;
+        }
+        
+        function highlightRequestRow(requestId) {
+            // Remove existing highlights
+            document.querySelectorAll('tr[data-request-id]').forEach(row => {
+                row.style.backgroundColor = '';
+            });
+            
+            // Highlight selected row
+            const selectedRow = document.querySelector(`tr[data-request-id="${requestId}"]`);
+            if (selectedRow) {
+                selectedRow.style.backgroundColor = '#e3f2fd';
+                selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        // Filter functionality
+        function filterRequests() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+            
+            requestMarkers.forEach(marker => {
+                const request = marker.requestData;
+                let show = true;
+                
+                // Status filter
+                if (statusFilter !== 'all') {
+                    show = show && marker.statusClass === statusFilter;
+                }
+                
+                // Priority filter
+                if (priorityFilter !== 'all') {
+                    show = show && marker.priorityClass === priorityFilter;
+                }
+                
+                if (show) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+        
+        // Toggle shelter visibility
+        function toggleShelters() {
+            if (sheltersVisible) {
+                // Hide shelters
+                shelterMarkers.forEach(marker => map.removeLayer(marker));
+                document.getElementById('show-shelters').style.display = 'inline-block';
+                document.getElementById('hide-shelters').style.display = 'none';
+                sheltersVisible = false;
+            } else {
+                // Show shelters
+                if (shelterMarkers.length === 0) {
+                    addShelterMarkers();
+                }
+                shelterMarkers.forEach(marker => marker.addTo(map));
+                document.getElementById('show-shelters').style.display = 'none';
+                document.getElementById('hide-shelters').style.display = 'inline-block';
+                sheltersVisible = true;
+            }
+        }
+        
+        // View toggle functionality
+        function toggleView(view) {
+            const mapSection = document.getElementById('map-section');
+            const mapLegend = document.getElementById('map-legend');
+            const requestsTable = document.getElementById('requests-table');
+            const mapBtn = document.getElementById('map-view-btn');
+            const tableBtn = document.getElementById('table-view-btn');
+            
+            if (view === 'map') {
+                mapSection.style.display = 'block';
+                mapLegend.style.display = 'block';
+                requestsTable.style.display = 'none';
+                mapBtn.classList.add('active');
+                tableBtn.classList.remove('active');
+                
+                // Initialize map if not already done
+                if (!map) {
+                    setTimeout(initRequestMap, 100);
+                } else {
+                    map.invalidateSize();
+                }
+            } else {
+                mapSection.style.display = 'none';
+                mapLegend.style.display = 'none';
+                requestsTable.style.display = 'block';
+                mapBtn.classList.remove('active');
+                tableBtn.classList.add('active');
+            }
+        }
+        
+        // Enhanced bulk actions and status modal functions from previous code...
+        
         // Bulk actions
         document.getElementById('select-all').addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('.request-checkbox');
@@ -277,6 +720,31 @@
                 modal.style.display = 'none';
             }
         }
+        
+        // Enhanced event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map by default
+            setTimeout(initRequestMap, 100);
+            
+            // Map view toggle
+            document.getElementById('map-view-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleView('map');
+            });
+            
+            document.getElementById('table-view-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleView('table');
+            });
+            
+            // Map filters
+            document.getElementById('status-filter').addEventListener('change', filterRequests);
+            document.getElementById('priority-filter').addEventListener('change', filterRequests);
+            
+            // Shelter toggle
+            document.getElementById('show-shelters').addEventListener('click', toggleShelters);
+            document.getElementById('hide-shelters').addEventListener('click', toggleShelters);
+        });
     </script>
 </body>
 </html>
