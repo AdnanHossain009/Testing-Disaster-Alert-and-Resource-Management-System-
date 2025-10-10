@@ -21,6 +21,7 @@ Route::get('/shelters/{id}', [ShelterController::class, 'show'])->name('shelters
 Route::get('/request-help', [RequestController::class, 'create'])->name('requests.create');
 Route::post('/request-help', [RequestController::class, 'store'])->name('requests.store');
 Route::get('/request/{id}', [RequestController::class, 'show'])->name('requests.show');
+Route::get('/requests', [RequestController::class, 'index'])->name('requests.index');
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -36,9 +37,10 @@ Route::get('/relief/dashboard', [AuthController::class, 'reliefDashboard'])->nam
 
 // Admin routes (protected)
 Route::prefix('admin')->middleware('web')->group(function () {
-    Route::get('/alerts', [AlertController::class, 'index'])->name('admin.alerts');
-    Route::get('/shelters', [ShelterController::class, 'manage'])->name('admin.shelters');
-    Route::get('/requests', [RequestController::class, 'index'])->name('requests.index');
+    Route::get('/alerts', [AlertController::class, 'adminIndex'])->name('admin.alerts');
+    Route::get('/shelters', [ShelterController::class, 'adminIndex'])->name('admin.shelters');
+    Route::get('/requests', [RequestController::class, 'adminIndex'])->name('admin.requests');
+    Route::get('/analytics', [AuthController::class, 'adminAnalytics'])->name('admin.analytics');
 });
 
 // Citizen routes (protected)

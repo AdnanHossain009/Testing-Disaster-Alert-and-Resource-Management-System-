@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Shelter;
+use Illuminate\Support\Facades\DB;
 
 class ShelterController extends Controller
 {
@@ -11,69 +13,33 @@ class ShelterController extends Controller
      */
     public function index()
     {
-        // Sample shelter data
-        $shelters = [
-            [
-                'id' => 1,
-                'name' => 'Dhaka Community Center',
-                'location' => 'Dhanmondi, Dhaka',
-                'address' => '15/A Dhanmondi Road, Dhaka-1205',
-                'capacity' => 200,
-                'occupied' => 45,
-                'available' => 155,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area', 'Children Area'],
-                'coordinates' => ['lat' => 23.7465, 'lng' => 90.3784]
-            ],
-            [
-                'id' => 2,
-                'name' => 'Cox\'s Bazar Relief Center',
-                'location' => 'Cox\'s Bazar Sadar',
-                'address' => 'Beach Road, Cox\'s Bazar-4700',
-                'capacity' => 150,
-                'occupied' => 130,
-                'available' => 20,
-                'status' => 'Nearly Full',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area'],
-                'coordinates' => ['lat' => 21.4272, 'lng' => 92.0058]
-            ],
-            [
-                'id' => 3,
-                'name' => 'Chittagong Sports Complex',
-                'location' => 'Chittagong City',
-                'address' => 'GEC Circle, Chittagong-4000',
-                'capacity' => 300,
-                'occupied' => 0,
-                'available' => 300,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area', 'Sports Facilities'],
-                'coordinates' => ['lat' => 22.3569, 'lng' => 91.7832]
-            ],
-            [
-                'id' => 4,
-                'name' => 'Sylhet City Hall',
-                'location' => 'Sylhet City',
-                'address' => 'Zindabazar, Sylhet-3100',
-                'capacity' => 100,
-                'occupied' => 95,
-                'available' => 5,
-                'status' => 'Nearly Full',
-                'contact' => '+880-1XXXXXXXXX',
-                'facilities' => ['Food', 'Medical Aid', 'Sleeping Area'],
-                'coordinates' => ['lat' => 24.8949, 'lng' => 91.8687]
-            ]
-        ];
+        $shelters = Shelter::where('status', 'Active')
+            ->orderBy('name')
+            ->get()
+            ->map(function($shelter) {
+                return [
+                    'id' => $shelter->id,
+                    'name' => $shelter->name,
+                    'location' => $shelter->city . ', ' . $shelter->state,
+                    'address' => $shelter->address,
+                    'capacity' => $shelter->capacity,
+                    'occupied' => $shelter->current_occupancy,
+                    'available' => $shelter->capacity - $shelter->current_occupancy,
+                    'status' => $shelter->current_occupancy >= $shelter->capacity ? 'Full' : 
+                               ($shelter->current_occupancy >= $shelter->capacity * 0.9 ? 'Nearly Full' : 'Available'),
+                    'contact' => $shelter->contact_phone,
+                    'facilities' => $shelter->facilities ?? [],
+                    'coordinates' => ['lat' => $shelter->latitude, 'lng' => $shelter->longitude]
+                ];
+            });
 
         // Calculate statistics
         $stats = [
-            'total_shelters' => count($shelters),
-            'available_shelters' => count(array_filter($shelters, fn($s) => $s['status'] === 'Available')),
-            'total_capacity' => array_sum(array_column($shelters, 'capacity')),
-            'total_occupied' => array_sum(array_column($shelters, 'occupied')),
-            'total_available' => array_sum(array_column($shelters, 'available'))
+            'total_shelters' => $shelters->count(),
+            'available_shelters' => $shelters->where('status', 'Available')->count(),
+            'total_capacity' => $shelters->sum('capacity'),
+            'total_occupied' => $shelters->sum('occupied'),
+            'total_available' => $shelters->sum('available')
         ];
 
         return view('shelters.index', compact('shelters', 'stats'));
@@ -84,66 +50,26 @@ class ShelterController extends Controller
      */
     public function show($id)
     {
-        // Sample shelter data
-        $shelters = [
-            1 => [
-                'id' => 1,
-                'name' => 'Dhaka Community Center',
-                'location' => 'Dhanmondi, Dhaka',
-                'address' => '15/A Dhanmondi Road, Dhaka-1205',
-                'capacity' => 200,
-                'occupied' => 45,
-                'available' => 155,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'manager' => 'Mr. Abdul Rahman',
-                'facilities' => ['Food Service', 'Medical Aid', 'Sleeping Area', 'Children Play Area', 'Restrooms', 'Security'],
-                'coordinates' => ['lat' => 23.7465, 'lng' => 90.3784],
-                'description' => 'Large community center with modern facilities. Equipped with backup power and water supply. Medical team available 24/7.',
-                'safety_measures' => ['Fire Safety System', 'Emergency Exits', 'First Aid Station', '24/7 Security'],
-                'last_updated' => '2025-09-12 14:30:00'
-            ],
-            2 => [
-                'id' => 2,
-                'name' => 'Cox\'s Bazar Relief Center',
-                'location' => 'Cox\'s Bazar Sadar',
-                'address' => 'Beach Road, Cox\'s Bazar-4700',
-                'capacity' => 150,
-                'occupied' => 130,
-                'available' => 20,
-                'status' => 'Nearly Full',
-                'contact' => '+880-1XXXXXXXXX',
-                'manager' => 'Ms. Fatima Khatun',
-                'facilities' => ['Food Service', 'Medical Aid', 'Sleeping Area', 'Restrooms'],
-                'coordinates' => ['lat' => 21.4272, 'lng' => 92.0058],
-                'description' => 'Coastal relief center designed for cyclone and tsunami emergencies. Close to evacuation routes.',
-                'safety_measures' => ['Tsunami Warning System', 'Emergency Exits', 'First Aid Station'],
-                'last_updated' => '2025-09-12 13:45:00'
-            ],
-            3 => [
-                'id' => 3,
-                'name' => 'Chittagong Sports Complex',
-                'location' => 'Chittagong City',
-                'address' => 'GEC Circle, Chittagong-4000',
-                'capacity' => 300,
-                'occupied' => 0,
-                'available' => 300,
-                'status' => 'Available',
-                'contact' => '+880-1XXXXXXXXX',
-                'manager' => 'Mr. Karim Ahmed',
-                'facilities' => ['Food Service', 'Medical Aid', 'Sleeping Area', 'Sports Facilities', 'Large Halls'],
-                'coordinates' => ['lat' => 22.3569, 'lng' => 91.7832],
-                'description' => 'Large sports complex with multiple halls and outdoor areas. Suitable for large-scale evacuations.',
-                'safety_measures' => ['Fire Safety System', 'Multiple Emergency Exits', 'Medical Facility', 'Security Team'],
-                'last_updated' => '2025-09-12 15:00:00'
-            ]
+        $shelterModel = Shelter::findOrFail($id);
+        
+        $shelter = [
+            'id' => $shelterModel->id,
+            'name' => $shelterModel->name,
+            'location' => $shelterModel->city . ', ' . $shelterModel->state,
+            'address' => $shelterModel->address,
+            'capacity' => $shelterModel->capacity,
+            'occupied' => $shelterModel->current_occupancy,
+            'available' => $shelterModel->capacity - $shelterModel->current_occupancy,
+            'status' => $shelterModel->current_occupancy >= $shelterModel->capacity ? 'Full' : 
+                       ($shelterModel->current_occupancy >= $shelterModel->capacity * 0.9 ? 'Nearly Full' : 'Available'),
+            'contact' => $shelterModel->contact_phone,
+            'manager' => 'Shelter Manager', // Can be added to model later
+            'facilities' => $shelterModel->facilities ?? [],
+            'coordinates' => ['lat' => $shelterModel->latitude, 'lng' => $shelterModel->longitude],
+            'description' => $shelterModel->description,
+            'safety_measures' => ['Fire Safety System', 'Emergency Exits', 'First Aid Station', '24/7 Security'],
+            'last_updated' => $shelterModel->updated_at->format('Y-m-d H:i:s')
         ];
-
-        $shelter = $shelters[$id] ?? null;
-
-        if (!$shelter) {
-            abort(404, 'Shelter not found');
-        }
 
         return view('shelters.show', compact('shelter'));
     }
@@ -153,30 +79,32 @@ class ShelterController extends Controller
      */
     public function findNearest($latitude, $longitude)
     {
-        // Sample logic for finding nearest shelter
-        $shelters = [
-            ['id' => 1, 'name' => 'Dhaka Community Center', 'available' => 155, 'lat' => 23.7465, 'lng' => 90.3784],
-            ['id' => 2, 'name' => 'Cox\'s Bazar Relief Center', 'available' => 20, 'lat' => 21.4272, 'lng' => 92.0058],
-            ['id' => 3, 'name' => 'Chittagong Sports Complex', 'available' => 300, 'lat' => 22.3569, 'lng' => 91.7832]
-        ];
+        $nearestShelter = Shelter::select('id', 'name', 'capacity', 'current_occupancy', 'latitude', 'longitude')
+            ->where('status', 'Active')
+            ->whereRaw('(capacity - current_occupancy) > 0')
+            ->selectRaw('*, ( 
+                6371 * acos( 
+                    cos( radians(?) ) * 
+                    cos( radians( latitude ) ) * 
+                    cos( radians( longitude ) - radians(?) ) + 
+                    sin( radians(?) ) * 
+                    sin( radians( latitude ) ) 
+                ) 
+            ) AS distance', [$latitude, $longitude, $latitude])
+            ->orderBy('distance')
+            ->first();
 
-        // Calculate distances and find nearest available shelter
-        $nearestShelter = null;
-        $minDistance = PHP_FLOAT_MAX;
-
-        foreach ($shelters as $shelter) {
-            if ($shelter['available'] > 0) {
-                // Simple distance calculation (in real app, use proper geo calculation)
-                $distance = sqrt(pow($latitude - $shelter['lat'], 2) + pow($longitude - $shelter['lng'], 2));
-                
-                if ($distance < $minDistance) {
-                    $minDistance = $distance;
-                    $nearestShelter = $shelter;
-                }
-            }
+        if ($nearestShelter) {
+            return [
+                'id' => $nearestShelter->id,
+                'name' => $nearestShelter->name,
+                'available' => $nearestShelter->capacity - $nearestShelter->current_occupancy,
+                'lat' => $nearestShelter->latitude,
+                'lng' => $nearestShelter->longitude
+            ];
         }
 
-        return $nearestShelter;
+        return null;
     }
 
     /**
@@ -184,10 +112,37 @@ class ShelterController extends Controller
      */
     public function manage()
     {
-        // For admin to manage shelters
-        $shelters = $this->index()->getData()['shelters'];
-        $stats = $this->index()->getData()['stats'];
+        $shelters = Shelter::orderBy('name')->get();
+        
+        $stats = [
+            'total_shelters' => $shelters->count(),
+            'available_shelters' => $shelters->where('status', 'Active')
+                ->filter(fn($s) => $s->current_occupancy < $s->capacity)->count(),
+            'total_capacity' => $shelters->sum('capacity'),
+            'total_occupied' => $shelters->sum('current_occupancy'),
+            'total_available' => $shelters->sum(fn($s) => $s->capacity - $s->current_occupancy)
+        ];
 
         return view('shelters.manage', compact('shelters', 'stats'));
+    }
+
+    /**
+     * Admin-specific shelter management page
+     */
+    public function adminIndex()
+    {
+        $shelters = Shelter::orderBy('name')->paginate(10);
+        
+        $stats = [
+            'total_shelters' => Shelter::count(),
+            'active_shelters' => Shelter::where('status', 'Active')->count(),
+            'full_shelters' => Shelter::whereRaw('current_occupancy >= capacity')->count(),
+            'available_shelters' => Shelter::where('status', 'Active')
+                ->whereRaw('current_occupancy < capacity')->count(),
+            'total_capacity' => Shelter::sum('capacity'),
+            'total_occupied' => Shelter::sum('current_occupancy')
+        ];
+
+        return view('admin.shelters.index', compact('shelters', 'stats'));
     }
 }

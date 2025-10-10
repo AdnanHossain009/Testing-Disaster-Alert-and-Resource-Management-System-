@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -27,46 +30,18 @@ class AuthController extends Controller
      
     public function login(Request $request)
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
 
-        // sample user authentication (in real app, use Laravel Auth)
-
-        $users = [
-            'admin@disaster.gov.bd' => [
-                'password' => 'admin123',
-                'role' => 'admin',
-                'name' => 'Admin User'
-            ],
-
-            'citizen@example.com' => [
-                'password' => 'citizen123',
-                'role' => 'citizen',
-                'name' => 'John Citizen'
-            ],
-
-            'relief@disaster.gov.bd' => [
-                'password' => 'relief123',
-                'role' => 'relief_worker',
-                'name' => 'Relief Worker'
-            ]
-        ];
-
-        if (isset($users[$email]) && $users[$email]['password'] === $password) {
-
-            // simulating session storage
-
-            session([
-                'user' => [
-                    'email' => $email,
-                    'name' => $users[$email]['name'],
-                    'role' => $users[$email]['role']
-                ]
-            ]);
-
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            
+            $user = Auth::user();
+            
             // redirect based on role
-
-            switch ($users[$email]['role']) {
+            switch ($user->role) {
                 case 'admin':
                     return redirect()->route('admin.dashboard');
                 case 'citizen':
@@ -78,7 +53,9 @@ class AuthController extends Controller
             }
         }
 
-        return back()->withErrors(['error' => 'Invalid credentials']);
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
     
@@ -86,32 +63,39 @@ class AuthController extends Controller
      
     public function register(Request $request)
     {
-
-        // sample registration (in real app, save to database)\
-
-        $userData = [
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'phone' => $request->input('phone'),
-            'role' => $request->input('role', 'citizen'),
-            'location' => $request->input('location')
-        ];
-
-        // simulate saving user
-
-        session([
-            'user' => $userData
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|confirmed',
+            'phone' => 'required|string|max:20',
+            'role' => 'required|in:admin,citizen,relief_worker',
+            'address' => 'nullable|string'
         ]);
 
-        return view('auth.register-success', compact('userData'));
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'role' => $validated['role'],
+            'address' => $validated['address'] ?? null
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard')->with('success', 'Registration successful!');
     }
 
 
      // handle logout
      
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget('user');
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
         return redirect()->route('dashboard')->with('message', 'Successfully logged out');
     }
 
@@ -120,22 +104,21 @@ class AuthController extends Controller
      
     public function adminDashboard()
     {
-        // check if user is admin
-
-        if (!session('user') || session('user')['role'] !== 'admin') {
+        // check if user is admin using Laravel Auth
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect()->route('login');
         }
 
-        // admin dashboard data
-        
+        // admin dashboard data with real Eloquent queries
         $stats = [
-            'total_alerts' => 3,
-            'active_alerts' => 2,
-            'total_shelters' => 4,
-            'available_shelters' => 2,
-            'pending_requests' => 1,
-            'assigned_requests' => 2,
-            'total_requests' => 4
+            'total_alerts' => \App\Models\Alert::count(),
+            'active_alerts' => \App\Models\Alert::active()->count(),
+            'total_shelters' => \App\Models\Shelter::count(),
+            'available_shelters' => \App\Models\Shelter::where('status', 'Active')
+                ->whereRaw('capacity > current_occupancy')->count(),
+            'pending_requests' => \App\Models\Request::where('status', 'Pending')->count(),
+            'assigned_requests' => \App\Models\Request::where('status', 'Assigned')->count(),
+            'total_requests' => \App\Models\Request::count()
         ];
 
         $recentActivity = [
@@ -169,55 +152,49 @@ class AuthController extends Controller
      
     public function citizenDashboard()
     {
-        // check if user is citizen
-
-        if (!session('user') || session('user')['role'] !== 'citizen') {
+        // check if user is citizen using Laravel Auth
+        if (!Auth::check() || Auth::user()->role !== 'citizen') {
             return redirect()->route('login');
         }
 
-        // citizen dashboard data
+        // citizen dashboard data with real queries
+        $activeAlerts = \App\Models\Alert::active()->recent()->limit(5)->get()->map(function($alert) {
+            return [
+                'id' => $alert->id,
+                'title' => $alert->title,
+                'severity' => $alert->severity,
+                'issued' => $alert->created_at->diffForHumans()
+            ];
+        });
 
-        $activeAlerts = [
-            [
-                'id' => 1,
-                'title' => 'Flood Warning - Dhaka',
-                'severity' => 'High',
-                'issued' => '2 hours ago'
-            ],
+        $myRequests = \App\Models\Request::with('assignment.shelter')
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($req) {
+                return [
+                    'id' => $req->id,
+                    'emergency_type' => $req->request_type,
+                    'status' => $req->status,
+                    'shelter' => $req->assignment ? $req->assignment->shelter->name : 'Not assigned',
+                    'submitted' => $req->created_at->diffForHumans()
+                ];
+            });
 
-            [
-                'id' => 3,
-                'title' => 'Cyclone Watch - Cox\'s Bazar',
-                'severity' => 'High',
-                'issued' => '6 hours ago'
-            ]
-        ];
-
-        $myRequests = [
-            [
-                'id' => 1,
-                'emergency_type' => 'Flood',
-                'status' => 'Assigned',
-                'shelter' => 'Dhaka Community Center',
-                'submitted' => '1 hour ago'
-            ]
-        ];
-
-        $nearestShelters = [
-            [
-                'name' => 'Dhaka Community Center',
-                'distance' => '2.3 km',
-                'availability' => 'Available',
-                'capacity' => '155/200'
-            ],
-
-            [
-                'name' => 'Gulshan Community Hall',
-                'distance' => '3.7 km',
-                'availability' => 'Nearly Full',
-                'capacity' => '8/50'
-            ]
-        ];
+        $nearestShelters = \App\Models\Shelter::where('status', 'Active')
+            ->whereRaw('capacity > current_occupancy')
+            ->limit(5)
+            ->get()
+            ->map(function($shelter) {
+                $available = $shelter->capacity - $shelter->current_occupancy;
+                return [
+                    'name' => $shelter->name,
+                    'distance' => '2.3 km', // Would calculate real distance in production
+                    'availability' => $available > 10 ? 'Available' : 'Nearly Full',
+                    'capacity' => $available . '/' . $shelter->capacity
+                ];
+            });
 
         return view('citizen.dashboard', compact('activeAlerts', 'myRequests', 'nearestShelters'));
     }
@@ -227,29 +204,81 @@ class AuthController extends Controller
     
     public function reliefDashboard()
     {
-        // check if user is relief worker
-        if (!session('user') || session('user')['role'] !== 'relief_worker') {
+        // check if user is relief worker using Laravel Auth
+        if (!Auth::check() || Auth::user()->role !== 'relief_worker') {
             return redirect()->route('login');
         }
 
-        // relief worker dashboard data
-
-        $assignedShelters = [
-            [
-                'name' => 'Dhaka Community Center',
-                'current_occupancy' => '45/200',
-                'status' => 'Active',
-                'location' => 'Dhanmondi, Dhaka'
-            ]
-        ];
+        // relief worker dashboard data with real queries
+        $assignedShelters = \App\Models\Shelter::where('status', 'Active')
+            ->limit(5)
+            ->get()
+            ->map(function($shelter) {
+                return [
+                    'name' => $shelter->name,
+                    'current_occupancy' => $shelter->current_occupancy . '/' . $shelter->capacity,
+                    'status' => $shelter->status,
+                    'location' => $shelter->city . ', ' . $shelter->state
+                ];
+            });
 
         $taskList = [
-            'Conduct headcount at Dhaka Community Center',
+            'Conduct headcount at assigned shelters',
             'Distribute food supplies to new arrivals',
             'Update shelter capacity status',
             'Coordinate with medical team'
         ];
 
         return view('relief.dashboard', compact('assignedShelters', 'taskList'));
+    }
+
+    /**
+     * Admin Analytics Page
+     */
+    public function adminAnalytics()
+    {
+        // check if user is admin using Laravel Auth
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect()->route('login');
+        }
+
+        // Analytics data
+        $analytics = [
+            'alerts' => [
+                'total' => \App\Models\Alert::count(),
+                'by_severity' => [
+                    'Critical' => \App\Models\Alert::where('severity', 'Critical')->count(),
+                    'High' => \App\Models\Alert::where('severity', 'High')->count(),
+                    'Medium' => \App\Models\Alert::where('severity', 'Medium')->count(),
+                    'Low' => \App\Models\Alert::where('severity', 'Low')->count(),
+                ],
+                'by_type' => [
+                    'Flood' => \App\Models\Alert::where('type', 'Flood')->count(),
+                    'Earthquake' => \App\Models\Alert::where('type', 'Earthquake')->count(),
+                    'Cyclone' => \App\Models\Alert::where('type', 'Cyclone')->count(),
+                ]
+            ],
+            'requests' => [
+                'total' => \App\Models\Request::count(),
+                'by_status' => [
+                    'Pending' => \App\Models\Request::where('status', 'Pending')->count(),
+                    'Assigned' => \App\Models\Request::where('status', 'Assigned')->count(),
+                    'Completed' => \App\Models\Request::where('status', 'Completed')->count(),
+                ],
+                'by_type' => [
+                    'Shelter' => \App\Models\Request::where('request_type', 'Shelter')->count(),
+                    'Medical' => \App\Models\Request::where('request_type', 'Medical')->count(),
+                    'Food' => \App\Models\Request::where('request_type', 'Food')->count(),
+                    'Rescue' => \App\Models\Request::where('request_type', 'Rescue')->count(),
+                ]
+            ],
+            'shelters' => [
+                'total' => \App\Models\Shelter::count(),
+                'active' => \App\Models\Shelter::where('status', 'Active')->count(),
+                'capacity_utilization' => \App\Models\Shelter::selectRaw('SUM(current_occupancy) as occupied, SUM(capacity) as total')->first(),
+            ]
+        ];
+
+        return view('admin.analytics', compact('analytics'));
     }
 }

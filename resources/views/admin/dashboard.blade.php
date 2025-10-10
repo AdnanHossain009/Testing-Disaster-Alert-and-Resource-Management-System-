@@ -205,7 +205,7 @@
         </div>
         <div class="header-right">
             <div class="user-info">
-                Welcome, {{ session('user')['name'] }} (Administrator)
+                Welcome, {{ Auth::user()->name }} (Administrator)
             </div>
             <a href="{{ route('auth.logout') }}" class="logout-btn">Logout</a>
         </div>
@@ -214,10 +214,10 @@
     <div class="nav">
         <div class="nav-content">
             <a href="{{ route('admin.dashboard') }}" class="active">Dashboard</a>
-            <a href="{{ route('alerts.index') }}">Manage Alerts</a>
-            <a href="{{ route('shelters.index') }}">Manage Shelters</a>
-            <a href="{{ route('requests.index') }}">Manage Requests</a>
-            <a href="#">Analytics</a>
+            <a href="{{ route('admin.alerts') }}">Manage Alerts</a>
+            <a href="{{ route('admin.shelters') }}">Manage Shelters</a>
+            <a href="{{ route('admin.requests') }}">Manage Requests</a>
+            <a href="{{ route('admin.analytics') }}">Analytics</a>
             <a href="#">Settings</a>
         </div>
     </div>
@@ -294,7 +294,7 @@
                 
                 <a href="#" class="action-btn danger">🚨 Create New Alert</a>
                 <a href="#" class="action-btn success">🏠 Add New Shelter</a>
-                <a href="{{ route('requests.index') }}" class="action-btn primary">📋 Review Requests</a>
+                <a href="{{ route('admin.requests') }}" class="action-btn primary">📋 Review Requests</a>
                 <a href="#" class="action-btn">📊 View Analytics</a>
                 <a href="#" class="action-btn">🗺️ Map Overview</a>
                 <a href="#" class="action-btn">📱 Send Notifications</a>

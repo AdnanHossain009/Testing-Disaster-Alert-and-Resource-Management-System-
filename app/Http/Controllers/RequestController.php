@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Request as HelpRequest;
+use App\Models\Shelter;
+use App\Models\Assignment;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
 {
@@ -11,80 +16,78 @@ class RequestController extends Controller
      */
     public function index()
     {
-        // Sample citizen requests data
-        $requests = [
-            [
-                'id' => 1,
-                'citizen_name' => 'John Rahman',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Dhanmondi, Dhaka',
-                'emergency_type' => 'Flood',
-                'description' => 'Water level rising rapidly in our area. Need immediate evacuation.',
-                'status' => 'Assigned',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'shelter_id' => 1,
-                'priority' => 'High',
-                'created_at' => '2025-09-12 10:30:00',
-                'assigned_at' => '2025-09-12 10:35:00',
-                'assignment_type' => 'Manual'
-            ],
-            [
-                'id' => 2,
-                'citizen_name' => 'Fatima Khatun',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Old Dhaka',
-                'emergency_type' => 'Building Collapse Risk',
-                'description' => 'Our building has cracks after earthquake. Family of 4 needs shelter.',
-                'status' => 'Pending',
-                'assigned_shelter' => null,
-                'shelter_id' => null,
-                'priority' => 'High',
-                'created_at' => '2025-09-12 11:45:00',
-                'assigned_at' => null,
-                'assignment_type' => null
-            ],
-            [
-                'id' => 3,
-                'citizen_name' => 'Ahmed Hassan',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Chittagong',
-                'emergency_type' => 'Cyclone',
-                'description' => 'Strong winds approaching. Elderly parents need safe shelter.',
-                'status' => 'Auto-Assigned',
-                'assigned_shelter' => 'Chittagong Sports Complex',
-                'shelter_id' => 3,
-                'priority' => 'Medium',
-                'created_at' => '2025-09-12 09:15:00',
-                'assigned_at' => '2025-09-12 09:16:00',
-                'assignment_type' => 'Auto'
-            ],
-            [
-                'id' => 4,
-                'citizen_name' => 'Rashida Begum',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Cox\'s Bazar',
-                'emergency_type' => 'Tsunami Warning',
-                'description' => 'Tsunami alert issued. Need immediate evacuation for 6 family members.',
-                'status' => 'Completed',
-                'assigned_shelter' => 'Cox\'s Bazar Relief Center',
-                'shelter_id' => 2,
-                'priority' => 'Critical',
-                'created_at' => '2025-09-12 06:00:00',
-                'assigned_at' => '2025-09-12 06:02:00',
-                'assignment_type' => 'Manual'
-            ]
-        ];
+        $helpRequests = HelpRequest::with(['user', 'assignment.shelter'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $requests = $helpRequests->map(function($req) {
+            return [
+                'id' => $req->id,
+                'citizen_name' => $req->name,
+                'phone' => $req->phone,
+                'location' => $req->location,
+                'emergency_type' => $req->request_type,
+                'description' => $req->description,
+                'status' => $req->status,
+                'assigned_shelter' => $req->assignment ? $req->assignment->shelter->name : null,
+                'shelter_id' => $req->assignment ? $req->assignment->shelter_id : null,
+                'priority' => $req->urgency,
+                'created_at' => $req->created_at->format('Y-m-d H:i:s'),
+                'assigned_at' => $req->assigned_at ? $req->assigned_at->format('Y-m-d H:i:s') : null,
+                'assignment_type' => $req->assignment ? 'Manual' : null
+            ];
+        });
 
         // Calculate statistics
         $stats = [
-            'total_requests' => count($requests),
-            'pending_requests' => count(array_filter($requests, fn($r) => $r['status'] === 'Pending')),
-            'assigned_requests' => count(array_filter($requests, fn($r) => in_array($r['status'], ['Assigned', 'Auto-Assigned']))),
-            'completed_requests' => count(array_filter($requests, fn($r) => $r['status'] === 'Completed')),
-            'auto_assignments' => count(array_filter($requests, fn($r) => $r['assignment_type'] === 'Auto'))
+            'total_requests' => $helpRequests->count(),
+            'pending_requests' => $helpRequests->where('status', 'Pending')->count(),
+            'assigned_requests' => $helpRequests->whereIn('status', ['Assigned', 'In Progress'])->count(),
+            'completed_requests' => $helpRequests->where('status', 'Completed')->count(),
+            'auto_assignments' => Assignment::count()
         ];
 
         return view('requests.index', compact('requests', 'stats'));
+    }
+
+    /**
+     * Admin-specific requests management page
+     */
+    public function adminIndex()
+    {
+        $helpRequests = HelpRequest::with(['user', 'assignment.shelter'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        $requests = $helpRequests->map(function($req) {
+            return [
+                'id' => $req->id,
+                'citizen_name' => $req->name,
+                'phone' => $req->phone,
+                'location' => $req->location,
+                'emergency_type' => $req->request_type,
+                'description' => $req->description,
+                'status' => $req->status,
+                'assigned_shelter' => $req->assignment ? $req->assignment->shelter->name : null,
+                'shelter_id' => $req->assignment ? $req->assignment->shelter_id : null,
+                'priority' => $req->urgency,
+                'created_at' => $req->created_at->format('Y-m-d H:i:s'),
+                'assigned_at' => $req->assigned_at ? $req->assigned_at->format('Y-m-d H:i:s') : null,
+                'assignment_type' => $req->assignment ? 'Manual' : null
+            ];
+        });
+
+        // Calculate statistics for admin
+        $stats = [
+            'total_requests' => HelpRequest::count(),
+            'pending_requests' => HelpRequest::where('status', 'Pending')->count(),
+            'assigned_requests' => HelpRequest::whereIn('status', ['Assigned', 'In Progress'])->count(),
+            'completed_requests' => HelpRequest::where('status', 'Completed')->count(),
+            'critical_requests' => HelpRequest::where('urgency', 'Critical')->count(),
+            'high_requests' => HelpRequest::where('urgency', 'High')->count()
+        ];
+
+        return view('admin.requests.index', compact('requests', 'stats', 'helpRequests'));
     }
 
     /**
@@ -100,38 +103,45 @@ class RequestController extends Controller
      */
     public function store(Request $request)
     {
-        // In real app, this would save to database
-        // For now, simulate the auto-assignment process
-        
-        $citizenData = [
-            'name' => $request->input('name'),
-            'phone' => $request->input('phone'),
-            'location' => $request->input('location'),
-            'emergency_type' => $request->input('emergency_type'),
-            'description' => $request->input('description'),
-            'family_size' => $request->input('family_size', 1)
-        ];
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email',
+            'location' => 'required|string',
+            'request_type' => 'required|in:Shelter,Medical,Food,Water,Rescue,Other',
+            'description' => 'required|string',
+            'people_count' => 'nullable|integer|min:1',
+            'special_needs' => 'nullable|string'
+        ]);
+
+        $validated['user_id'] = Auth::id() ?? User::where('role', 'admin')->first()->id; // Default to admin if not logged in
+        $validated['urgency'] = 'Medium'; // Default urgency
+        $validated['status'] = 'Pending';
+
+        // Get coordinates from location (simplified)
+        $coords = $this->getCoordinatesFromLocation($validated['location']);
+        $validated['latitude'] = $coords['lat'];
+        $validated['longitude'] = $coords['lng'];
+
+        $helpRequest = HelpRequest::create($validated);
 
         // Simulate admin availability check
         $adminOnline = $this->checkAdminAvailability();
         
-        if ($adminOnline) {
-            // Admin is online - manual assignment will be done
-            $status = 'Pending';
-            $assignmentType = 'Manual';
-            $message = 'Your request has been submitted. An admin will assign you a shelter shortly.';
-        } else {
-            // Admin offline - auto-assign nearest shelter
-            $nearestShelter = $this->autoAssignShelter($request->input('location'));
+        if (!$adminOnline) {
+            // Auto-assign nearest shelter
+            $nearestShelter = $this->autoAssignShelter($helpRequest);
             $status = $nearestShelter ? 'Auto-Assigned' : 'Pending';
-            $assignmentType = 'Auto';
             $message = $nearestShelter 
-                ? 'Auto-assigned to ' . $nearestShelter['name'] . '. Please proceed immediately.'
+                ? 'Auto-assigned to ' . $nearestShelter->name . '. Please proceed immediately.'
                 : 'No available shelters found. Your request is pending manual review.';
+        } else {
+            $status = 'Pending';
+            $message = 'Your request has been submitted. An admin will assign you a shelter shortly.';
         }
 
-        // Simulate saving request
-        $requestId = rand(100, 999);
+        $citizenData = $validated;
+        $requestId = $helpRequest->id;
 
         return view('requests.success', compact('requestId', 'status', 'message', 'citizenData'));
     }
@@ -141,32 +151,25 @@ class RequestController extends Controller
      */
     public function show($id)
     {
-        // Sample request data
-        $requests = [
-            1 => [
-                'id' => 1,
-                'citizen_name' => 'John Rahman',
-                'phone' => '+880-1XXXXXXXXX',
-                'location' => 'Dhanmondi, Dhaka',
-                'emergency_type' => 'Flood',
-                'description' => 'Water level rising rapidly in our area. Need immediate evacuation for family of 3.',
-                'status' => 'Assigned',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'shelter_id' => 1,
-                'priority' => 'High',
-                'family_size' => 3,
-                'created_at' => '2025-09-12 10:30:00',
-                'assigned_at' => '2025-09-12 10:35:00',
-                'assignment_type' => 'Manual',
-                'admin_notes' => 'Verified emergency situation. Family safely relocated.'
-            ]
+        $helpRequest = HelpRequest::with(['user', 'assignment.shelter'])->findOrFail($id);
+
+        $request = [
+            'id' => $helpRequest->id,
+            'citizen_name' => $helpRequest->name,
+            'phone' => $helpRequest->phone,
+            'location' => $helpRequest->location,
+            'emergency_type' => $helpRequest->request_type,
+            'description' => $helpRequest->description,
+            'status' => $helpRequest->status,
+            'assigned_shelter' => $helpRequest->assignment ? $helpRequest->assignment->shelter->name : null,
+            'shelter_id' => $helpRequest->assignment ? $helpRequest->assignment->shelter_id : null,
+            'priority' => $helpRequest->urgency,
+            'family_size' => $helpRequest->people_count,
+            'created_at' => $helpRequest->created_at->format('Y-m-d H:i:s'),
+            'assigned_at' => $helpRequest->assigned_at ? $helpRequest->assigned_at->format('Y-m-d H:i:s') : null,
+            'assignment_type' => $helpRequest->assignment ? 'Manual' : null,
+            'admin_notes' => $helpRequest->admin_notes
         ];
-
-        $request = $requests[$id] ?? null;
-
-        if (!$request) {
-            abort(404, 'Request not found');
-        }
 
         return view('requests.show', compact('request'));
     }
@@ -176,23 +179,22 @@ class RequestController extends Controller
      */
     public function citizenDashboard()
     {
-        // Sample citizen's requests
-        $myRequests = [
-            [
-                'id' => 1,
-                'emergency_type' => 'Flood',
-                'status' => 'Assigned',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'created_at' => '2025-09-12 10:30:00'
-            ],
-            [
-                'id' => 5,
-                'emergency_type' => 'Building Safety',
-                'status' => 'Completed',
-                'assigned_shelter' => 'Dhaka Community Center',
-                'created_at' => '2025-09-10 15:20:00'
-            ]
-        ];
+        $userId = Auth::id() ?? User::where('role', 'citizen')->first()->id;
+        
+        $helpRequests = HelpRequest::with('assignment.shelter')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $myRequests = $helpRequests->map(function($req) {
+            return [
+                'id' => $req->id,
+                'emergency_type' => $req->request_type,
+                'status' => $req->status,
+                'assigned_shelter' => $req->assignment ? $req->assignment->shelter->name : null,
+                'created_at' => $req->created_at->format('Y-m-d H:i:s')
+            ];
+        });
 
         return view('requests.citizen-dashboard', compact('myRequests'));
     }
@@ -210,18 +212,49 @@ class RequestController extends Controller
     /**
      * Auto-assign nearest available shelter
      */
-    private function autoAssignShelter($location)
+    private function autoAssignShelter($helpRequest)
     {
-        // Simulate getting coordinates from location
-        $coordinates = $this->getCoordinatesFromLocation($location);
-        
-        if (!$coordinates) {
+        if (!$helpRequest->latitude || !$helpRequest->longitude) {
             return null;
         }
 
-        // Use ShelterController's findNearest method
-        $shelterController = new \App\Http\Controllers\ShelterController();
-        return $shelterController->findNearest($coordinates['lat'], $coordinates['lng']);
+        $nearestShelter = Shelter::select('*')
+            ->where('status', 'Active')
+            ->whereRaw('(capacity - current_occupancy) > 0')
+            ->selectRaw('( 
+                6371 * acos( 
+                    cos( radians(?) ) * 
+                    cos( radians( latitude ) ) * 
+                    cos( radians( longitude ) - radians(?) ) + 
+                    sin( radians(?) ) * 
+                    sin( radians( latitude ) ) 
+                ) 
+            ) AS distance', [$helpRequest->latitude, $helpRequest->longitude, $helpRequest->latitude])
+            ->orderBy('distance')
+            ->first();
+
+        if ($nearestShelter) {
+            // Create assignment
+            Assignment::create([
+                'request_id' => $helpRequest->id,
+                'shelter_id' => $nearestShelter->id,
+                'assigned_by' => 1, // System/Admin user
+                'assigned_at' => now(),
+                'status' => 'Assigned',
+                'notes' => 'Auto-assigned to nearest available shelter'
+            ]);
+
+            // Update request status
+            $helpRequest->update([
+                'status' => 'Assigned',
+                'assigned_at' => now(),
+                'assigned_by' => 1
+            ]);
+
+            return $nearestShelter;
+        }
+
+        return null;
     }
 
     /**
