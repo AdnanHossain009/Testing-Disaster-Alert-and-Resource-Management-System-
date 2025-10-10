@@ -37,10 +37,31 @@ Route::get('/relief/dashboard', [AuthController::class, 'reliefDashboard'])->nam
 
 // Admin routes (protected)
 Route::prefix('admin')->middleware('web')->group(function () {
+    // Admin Dashboard
     Route::get('/alerts', [AlertController::class, 'adminIndex'])->name('admin.alerts');
     Route::get('/shelters', [ShelterController::class, 'adminIndex'])->name('admin.shelters');
     Route::get('/requests', [RequestController::class, 'adminIndex'])->name('admin.requests');
     Route::get('/analytics', [AuthController::class, 'adminAnalytics'])->name('admin.analytics');
+    
+    // Alert CRUD Operations
+    Route::get('/alerts/create', [AlertController::class, 'create'])->name('admin.alerts.create');
+    Route::post('/alerts', [AlertController::class, 'store'])->name('admin.alerts.store');
+    Route::get('/alerts/{id}/edit', [AlertController::class, 'edit'])->name('admin.alerts.edit');
+    Route::put('/alerts/{id}', [AlertController::class, 'update'])->name('admin.alerts.update');
+    Route::delete('/alerts/{id}', [AlertController::class, 'destroy'])->name('admin.alerts.destroy');
+    
+    // Shelter CRUD Operations
+    Route::get('/shelters/create', [ShelterController::class, 'create'])->name('admin.shelters.create');
+    Route::post('/shelters', [ShelterController::class, 'store'])->name('admin.shelters.store');
+    Route::get('/shelters/{id}/edit', [ShelterController::class, 'edit'])->name('admin.shelters.edit');
+    Route::put('/shelters/{id}', [ShelterController::class, 'update'])->name('admin.shelters.update');
+    Route::delete('/shelters/{id}', [ShelterController::class, 'destroy'])->name('admin.shelters.destroy');
+    
+    // Request Management Operations
+    Route::get('/requests/{id}/assign', [RequestController::class, 'showAssign'])->name('admin.requests.assign');
+    Route::post('/requests/{id}/assign', [RequestController::class, 'assign'])->name('admin.requests.assign.store');
+    Route::post('/requests/bulk-assign', [RequestController::class, 'bulkAssign'])->name('admin.requests.bulk-assign');
+    Route::put('/requests/{id}/status', [RequestController::class, 'updateStatus'])->name('admin.requests.update-status');
 });
 
 // Citizen routes (protected)

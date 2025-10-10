@@ -29,9 +29,9 @@ class Shelter extends Model
     ];
 
     protected $casts = [
+        'facilities' => 'array',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'facilities' => 'array',
         'capacity' => 'integer',
         'current_occupancy' => 'integer',
     ];

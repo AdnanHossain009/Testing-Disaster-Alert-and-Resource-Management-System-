@@ -49,6 +49,20 @@
     </div>
 
     <div class="container">
+        <!-- Action Buttons -->
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Alert Management</h2>
+            <a href="{{ route('admin.alerts.create') }}" class="btn btn-success">
+                ➕ Create New Alert
+            </a>
+        </div>
+
+        @if(session('success'))
+        <div style="background: #48bb78; color: white; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+            {{ session('success') }}
+        </div>
+        @endif
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number">{{ $stats['total_alerts'] }}</div>
@@ -94,8 +108,12 @@
                         <td>{{ $alert->created_at->format('M d, Y H:i') }}</td>
                         <td>
                             <a href="{{ route('alerts.show', $alert->id) }}" class="btn btn-primary">View</a>
-                            <button class="btn btn-success">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
+                            <a href="{{ route('admin.alerts.edit', $alert->id) }}" class="btn btn-success">Edit</a>
+                            <form method="POST" action="{{ route('admin.alerts.destroy', $alert->id) }}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this alert?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

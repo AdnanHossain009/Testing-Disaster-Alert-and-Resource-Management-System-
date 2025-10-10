@@ -145,4 +145,103 @@ class ShelterController extends Controller
 
         return view('admin.shelters.index', compact('shelters', 'stats'));
     }
+
+    /**
+     * Show form for creating new shelter
+     */
+    public function create()
+    {
+        return view('admin.shelters.create');
+    }
+
+    /**
+     * Store a new shelter
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'capacity' => 'required|integer|min:1',
+            'contact_phone' => 'required|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'string'
+        ]);
+
+        $validated['current_occupancy'] = 0;
+        $validated['status'] = 'Active';
+
+        Shelter::create($validated);
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter created successfully!');
+    }
+
+    /**
+     * Show form for editing shelter
+     */
+    public function edit($id)
+    {
+        $shelter = Shelter::findOrFail($id);
+        return view('admin.shelters.edit', compact('shelter'));
+    }
+
+    /**
+     * Update shelter
+     */
+    public function update(Request $request, $id)
+    {
+        $shelter = Shelter::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'capacity' => 'required|integer|min:1',
+            'current_occupancy' => 'required|integer|min:0',
+            'status' => 'required|in:Active,Maintenance,Closed',
+            'contact_phone' => 'required|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'string'
+        ]);
+
+        $shelter->update($validated);
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter updated successfully!');
+    }
+
+    /**
+     * Delete shelter
+     */
+    public function destroy($id)
+    {
+        $shelter = Shelter::findOrFail($id);
+        
+        // Check if shelter has current assignments
+        $hasAssignments = DB::table('assignments')
+            ->where('shelter_id', $id)
+            ->whereIn('status', ['Assigned', 'Checked In'])
+            ->exists();
+
+        if ($hasAssignments) {
+            return redirect()->route('admin.shelters')
+                ->with('error', 'Cannot delete shelter with active assignments. Please reassign people first.');
+        }
+
+        $shelter->delete();
+
+        return redirect()->route('admin.shelters')->with('success', 'Shelter deleted successfully!');
+    }
 }

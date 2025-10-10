@@ -87,7 +87,12 @@ class RequestController extends Controller
             'high_requests' => HelpRequest::where('urgency', 'High')->count()
         ];
 
-        return view('admin.requests.index', compact('requests', 'stats', 'helpRequests'));
+        // Get available shelters for bulk assignment
+        $availableShelters = Shelter::where('status', 'Active')
+            ->whereRaw('current_occupancy < capacity')
+            ->get();
+
+        return view('admin.requests.index', compact('requests', 'stats', 'helpRequests', 'availableShelters'));
     }
 
     /**
@@ -182,24 +187,156 @@ class RequestController extends Controller
      */
     public function citizenDashboard()
     {
-        $userId = Auth::id() ?? User::where('role', 'citizen')->first()->id;
-        
-        $helpRequests = HelpRequest::with('assignment.shelter')
-            ->where('user_id', $userId)
+        $userId = Auth::id();
+        $helpRequests = HelpRequest::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
-        $myRequests = $helpRequests->map(function($req) {
+        $requests = $helpRequests->map(function($req) {
             return [
                 'id' => $req->id,
                 'emergency_type' => $req->request_type,
+                'description' => $req->description,
                 'status' => $req->status,
                 'assigned_shelter' => $req->assignment ? $req->assignment->shelter->name : null,
-                'created_at' => $req->created_at->format('Y-m-d H:i:s')
+                'created_at' => $req->created_at->format('Y-m-d H:i:s'),
+                'assigned_at' => $req->assigned_at ? $req->assigned_at->format('Y-m-d H:i:s') : null
             ];
         });
 
-        return view('requests.citizen-dashboard', compact('myRequests'));
+        return view('citizen.requests', compact('requests', 'helpRequests'));
+    }
+
+    /**
+     * Show assignment form for a specific request
+     */
+    public function showAssign($id)
+    {
+        $helpRequest = HelpRequest::with(['user'])->findOrFail($id);
+        $availableShelters = Shelter::where('status', 'Active')
+            ->whereRaw('current_occupancy < capacity')
+            ->get();
+
+        return view('admin.requests.assign', compact('helpRequest', 'availableShelters'));
+    }
+
+    /**
+     * Assign a request to a shelter
+     */
+    public function assign(Request $request, $id)
+    {
+        $helpRequest = HelpRequest::findOrFail($id);
+
+        $validated = $request->validate([
+            'shelter_id' => 'required|exists:shelters,id',
+            'admin_notes' => 'nullable|string'
+        ]);
+
+        // Check if shelter has capacity
+        $shelter = Shelter::findOrFail($validated['shelter_id']);
+        if ($shelter->current_occupancy >= $shelter->capacity) {
+            return redirect()->back()->with('error', 'Selected shelter is at full capacity.');
+        }
+
+        // Create assignment
+        Assignment::create([
+            'request_id' => $helpRequest->id,
+            'shelter_id' => $validated['shelter_id'],
+            'assigned_by' => Auth::id(),
+            'assigned_at' => now(),
+            'status' => 'Assigned',
+            'notes' => $validated['admin_notes']
+        ]);
+
+        // Update request status
+        $helpRequest->update([
+            'status' => 'Assigned',
+            'assigned_by' => Auth::id(),
+            'assigned_at' => now(),
+            'admin_notes' => $validated['admin_notes']
+        ]);
+
+        // Update shelter occupancy
+        $shelter->increment('current_occupancy', $helpRequest->people_count ?? 1);
+
+        return redirect()->route('admin.requests')->with('success', 'Request assigned successfully!');
+    }
+
+    /**
+     * Bulk assign multiple requests
+     */
+    public function bulkAssign(Request $request)
+    {
+        $validated = $request->validate([
+            'request_ids' => 'required|array',
+            'request_ids.*' => 'exists:requests,id',
+            'shelter_id' => 'required|exists:shelters,id',
+            'admin_notes' => 'nullable|string'
+        ]);
+
+        $shelter = Shelter::findOrFail($validated['shelter_id']);
+        $requests = HelpRequest::whereIn('id', $validated['request_ids'])
+            ->where('status', 'Pending')
+            ->get();
+
+        if ($requests->isEmpty()) {
+            return redirect()->back()->with('error', 'No pending requests found to assign.');
+        }
+
+        $totalPeople = $requests->sum('people_count');
+        $availableCapacity = $shelter->capacity - $shelter->current_occupancy;
+
+        if ($totalPeople > $availableCapacity) {
+            return redirect()->back()->with('error', 'Shelter does not have enough capacity for all selected requests.');
+        }
+
+        $assignedCount = 0;
+        foreach ($requests as $helpRequest) {
+            // Create assignment
+            Assignment::create([
+                'request_id' => $helpRequest->id,
+                'shelter_id' => $validated['shelter_id'],
+                'assigned_by' => Auth::id(),
+                'assigned_at' => now(),
+                'status' => 'Assigned',
+                'notes' => $validated['admin_notes']
+            ]);
+
+            // Update request
+            $helpRequest->update([
+                'status' => 'Assigned',
+                'assigned_by' => Auth::id(),
+                'assigned_at' => now(),
+                'admin_notes' => $validated['admin_notes']
+            ]);
+
+            $assignedCount++;
+        }
+
+        // Update shelter occupancy
+        $shelter->increment('current_occupancy', $totalPeople);
+
+        return redirect()->route('admin.requests')->with('success', "Successfully assigned {$assignedCount} requests to {$shelter->name}!");
+    }
+
+    /**
+     * Update request status
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $helpRequest = HelpRequest::findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:Pending,Assigned,In Progress,Completed,Cancelled',
+            'admin_notes' => 'nullable|string'
+        ]);
+
+        $helpRequest->update([
+            'status' => $validated['status'],
+            'admin_notes' => $validated['admin_notes']
+        ]);
+
+        return redirect()->route('admin.requests')->with('success', 'Request status updated successfully!');
     }
 
     /**
