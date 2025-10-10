@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Alert;
 use App\Models\Shelter;
-use App\Models\Request as HelpRequest;
+use App\Models\HelpRequest;
 use App\Models\Assignment;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;

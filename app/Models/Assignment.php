@@ -33,7 +33,7 @@ class Assignment extends Model
 
     public function request(): BelongsTo
     {
-        return $this->belongsTo(Request::class);
+        return $this->belongsTo(HelpRequest::class, 'request_id');
     }
 
     /**
@@ -119,8 +119,11 @@ class Assignment extends Model
             'notes' => $reason
         ]);
 
-        // Update request status
-        $this->request->update(['status' => 'Pending']);
+        // Update request status - using the correct relationship
+        $helpRequest = HelpRequest::find($this->request_id);
+        if ($helpRequest) {
+            $helpRequest->update(['status' => 'Pending']);
+        }
 
         // Update shelter occupancy
         $this->shelter->updateOccupancy();

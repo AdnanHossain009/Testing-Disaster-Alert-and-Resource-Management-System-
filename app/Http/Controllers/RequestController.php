@@ -72,7 +72,7 @@ class RequestController extends Controller
                 'shelter_id' => $req->assignment ? $req->assignment->shelter_id : null,
                 'priority' => $req->urgency,
                 'created_at' => $req->created_at->format('Y-m-d H:i:s'),
-                'assigned_at' => $req->assigned_at ? $req->assigned_at->format('Y-m-d H:i:s') : null,
+                'assigned_at' => $req->assigned_at && $req->assigned_at instanceof \Carbon\Carbon ? $req->assigned_at->format('Y-m-d H:i:s') : $req->assigned_at,
                 'assignment_type' => $req->assignment ? 'Manual' : null
             ];
         });
@@ -151,7 +151,10 @@ class RequestController extends Controller
      */
     public function show($id)
     {
-        $helpRequest = HelpRequest::with(['user', 'assignment.shelter'])->findOrFail($id);
+        $helpRequest = HelpRequest::with(['user'])->findOrFail($id);
+
+        // Try to get assignment separately to avoid relationship issues
+        $assignment = Assignment::where('request_id', $id)->with('shelter')->first();
 
         $request = [
             'id' => $helpRequest->id,
@@ -161,13 +164,13 @@ class RequestController extends Controller
             'emergency_type' => $helpRequest->request_type,
             'description' => $helpRequest->description,
             'status' => $helpRequest->status,
-            'assigned_shelter' => $helpRequest->assignment ? $helpRequest->assignment->shelter->name : null,
-            'shelter_id' => $helpRequest->assignment ? $helpRequest->assignment->shelter_id : null,
-            'priority' => $helpRequest->urgency,
-            'family_size' => $helpRequest->people_count,
+            'assigned_shelter' => $assignment && $assignment->shelter ? $assignment->shelter->name : null,
+            'shelter_id' => $assignment ? $assignment->shelter_id : null,
+            'priority' => $helpRequest->urgency ?? 'Medium',
+            'family_size' => $helpRequest->people_count ?? 1,
             'created_at' => $helpRequest->created_at->format('Y-m-d H:i:s'),
-            'assigned_at' => $helpRequest->assigned_at ? $helpRequest->assigned_at->format('Y-m-d H:i:s') : null,
-            'assignment_type' => $helpRequest->assignment ? 'Manual' : null,
+            'assigned_at' => $assignment && $assignment->assigned_at ? $assignment->assigned_at->format('Y-m-d H:i:s') : null,
+            'assignment_type' => $assignment ? 'Manual' : null,
             'admin_notes' => $helpRequest->admin_notes
         ];
 
