@@ -124,8 +124,8 @@
                 <p><strong>Name:</strong> {{ $citizenData['name'] }}</p>
                 <p><strong>Phone:</strong> {{ $citizenData['phone'] }}</p>
                 <p><strong>Location:</strong> {{ $citizenData['location'] }}</p>
-                <p><strong>Emergency Type:</strong> {{ $citizenData['emergency_type'] }}</p>
-                <p><strong>Group Size:</strong> {{ $citizenData['family_size'] }} people</p>
+                <p><strong>Emergency Type:</strong> {{ $citizenData['request_type'] }}</p>
+                <p><strong>Group Size:</strong> {{ $citizenData['people_count'] }} people</p>
             </div>
 
             @if($status === 'Auto-Assigned')

@@ -192,6 +192,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" 
+                           placeholder="your.email@example.com">
+                    <div class="help-text">Optional - for status updates</div>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="location">Current Location *</label>
                     <input type="text" id="location" name="location" class="form-input" 
                            placeholder="e.g., Dhanmondi, Dhaka" required>
@@ -200,22 +207,21 @@
 
                 <!-- Emergency Details -->
                 <div class="form-group">
-                    <label class="form-label" for="emergency_type">Emergency Type *</label>
-                    <select id="emergency_type" name="emergency_type" class="form-select" required>
+                    <label class="form-label" for="request_type">Emergency Type *</label>
+                    <select id="request_type" name="request_type" class="form-select" required>
                         <option value="">Select emergency type</option>
-                        <option value="Flood">Flood</option>
-                        <option value="Earthquake">Earthquake</option>
-                        <option value="Cyclone">Cyclone</option>
-                        <option value="Tsunami">Tsunami</option>
-                        <option value="Fire">Fire</option>
-                        <option value="Building Collapse">Building Collapse</option>
+                        <option value="Shelter">Need Shelter</option>
+                        <option value="Medical">Medical Emergency</option>
+                        <option value="Food">Need Food/Water</option>
+                        <option value="Water">Need Water Supply</option>
+                        <option value="Rescue">Need Rescue</option>
                         <option value="Other">Other Emergency</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="family_size">Family/Group Size</label>
-                    <input type="number" id="family_size" name="family_size" class="form-input" 
+                    <label class="form-label" for="people_count">Family/Group Size</label>
+                    <input type="number" id="people_count" name="people_count" class="form-input" 
                            min="1" max="20" value="1">
                     <div class="help-text">Number of people needing shelter</div>
                 </div>
@@ -229,24 +235,10 @@
 
                 <!-- Special Needs -->
                 <div class="form-group">
-                    <label class="form-label">Special Requirements (check all that apply)</label>
-                    <div style="margin-top: 0.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: normal;">
-                            <input type="checkbox" name="needs[]" value="medical"> Medical assistance needed
-                        </label>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: normal;">
-                            <input type="checkbox" name="needs[]" value="children"> Children in group
-                        </label>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: normal;">
-                            <input type="checkbox" name="needs[]" value="elderly"> Elderly person(s)
-                        </label>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: normal;">
-                            <input type="checkbox" name="needs[]" value="disability"> Person with disability
-                        </label>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: normal;">
-                            <input type="checkbox" name="needs[]" value="pets"> Pets/animals
-                        </label>
-                    </div>
+                    <label class="form-label" for="special_needs">Special Requirements</label>
+                    <textarea id="special_needs" name="special_needs" class="form-textarea" 
+                              placeholder="Any special needs, medical conditions, disabilities, children, elderly, pets, etc."></textarea>
+                    <div class="help-text">Describe any special assistance needed for your group</div>
                 </div>
 
                 <!-- Submit Button -->

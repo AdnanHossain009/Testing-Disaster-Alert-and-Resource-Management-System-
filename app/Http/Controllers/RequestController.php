@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Request as HelpRequest;
+use App\Models\HelpRequest;
 use App\Models\Shelter;
 use App\Models\Assignment;
 use App\Models\User;
@@ -114,7 +114,7 @@ class RequestController extends Controller
             'special_needs' => 'nullable|string'
         ]);
 
-        $validated['user_id'] = Auth::id() ?? User::where('role', 'admin')->first()->id; // Default to admin if not logged in
+        $validated['user_id'] = Auth::id() ?? User::where('email', 'guest@emergency.system')->first()->id; // Use guest user for anonymous requests
         $validated['urgency'] = 'Medium'; // Default urgency
         $validated['status'] = 'Pending';
 
