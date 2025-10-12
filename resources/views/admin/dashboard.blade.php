@@ -311,5 +311,242 @@
             </div>
         </div>
     </div>
+
+    <!-- Real-time Notifications Container -->
+    <div id="notifications-container" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 400px;
+    "></div>
+
+    <!-- Pusher JavaScript SDK -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        // Initialize Pusher
+        const pusher = new Pusher('emergency-key', {
+            cluster: 'mt1',
+            forceTLS: true,
+            enabledTransports: ['ws', 'wss', 'xhr_polling', 'xhr_streaming'],
+            disabledTransports: []
+        });
+
+        // Subscribe to emergency requests channel
+        const channel = pusher.subscribe('emergency-requests');
+
+        // Listen for new request submissions
+        channel.bind('new.request.submitted', function(data) {
+            console.log('New emergency request received:', data);
+            
+            // Show real-time notification
+            showEmergencyNotification(data);
+            
+            // Play notification sound for critical requests
+            if (data.urgency === 'Critical' || data.urgency === 'High') {
+                playNotificationSound();
+            }
+            
+            // Update dashboard statistics in real-time
+            updateDashboardStats();
+        });
+
+        // Function to show emergency notification
+        function showEmergencyNotification(request) {
+            const container = document.getElementById('notifications-container');
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                background: linear-gradient(135deg, #e74c3c, #c0392b);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+                transform: translateX(100%);
+                transition: transform 0.5s ease-in-out;
+                border-left: 5px solid #fff;
+            `;
+            
+            // Determine urgency color
+            let urgencyColor = '#f39c12'; // Medium
+            if (request.urgency === 'Critical') urgencyColor = '#e74c3c';
+            else if (request.urgency === 'High') urgencyColor = '#e67e22';
+            else if (request.urgency === 'Low') urgencyColor = '#27ae60';
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 24px; margin-right: 10px;">🚨</div>
+                    <div>
+                        <div style="font-weight: bold; font-size: 16px;">New Emergency Request</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Request #${request.id}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>👤 Name:</strong> ${request.name}
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>📍 Location:</strong> ${request.location}
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>🚨 Type:</strong> ${request.request_type}
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>⚡ Priority:</strong> 
+                    <span style="
+                        background: ${urgencyColor};
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 12px;
+                        font-size: 12px;
+                        font-weight: bold;
+                    ">${request.urgency}</span>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>👥 People:</strong> ${request.people_count} person(s)
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="viewRequest(${request.id})" style="
+                        background: #3498db;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    ">👁️ View Details</button>
+                    <button onclick="assignRequest(${request.id})" style="
+                        background: #27ae60;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    ">🏠 Assign Shelter</button>
+                    <button onclick="closeNotification(this)" style="
+                        background: #95a5a6;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    ">✖️ Close</button>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-remove after 30 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    closeNotification(notification);
+                }
+            }, 30000);
+        }
+
+        // Function to play notification sound
+        function playNotificationSound() {
+            // Create audio context for notification sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Function to update dashboard statistics
+        function updateDashboardStats() {
+            // Update pending requests count
+            const pendingElement = document.querySelector('.stat-number');
+            if (pendingElement) {
+                const currentCount = parseInt(pendingElement.textContent) || 0;
+                pendingElement.textContent = currentCount + 1;
+                
+                // Add animation effect
+                pendingElement.style.transform = 'scale(1.2)';
+                pendingElement.style.color = '#e74c3c';
+                setTimeout(() => {
+                    pendingElement.style.transform = 'scale(1)';
+                    pendingElement.style.color = '';
+                }, 300);
+            }
+        }
+
+        // Utility functions
+        function viewRequest(requestId) {
+            window.open(`/requests/${requestId}`, '_blank');
+        }
+
+        function assignRequest(requestId) {
+            window.open(`/admin/requests/${requestId}/assign`, '_blank');
+        }
+
+        function closeNotification(element) {
+            const notification = element.closest('div[style*="background: linear-gradient"]') || element;
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
+        }
+
+        // Connection status monitoring
+        pusher.connection.bind('connected', function() {
+            console.log('✅ Real-time connection established');
+            
+            // Update system health indicator
+            const healthIndicator = document.querySelector('div:contains("Notifications: Active")');
+            if (healthIndicator) {
+                healthIndicator.style.color = '#27ae60';
+            }
+        });
+
+        pusher.connection.bind('disconnected', function() {
+            console.log('❌ Real-time connection lost');
+            
+            // Show connection status notification
+            const container = document.getElementById('notifications-container');
+            const connectionAlert = document.createElement('div');
+            connectionAlert.innerHTML = `
+                <div style="
+                    background: #f39c12;
+                    color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                ">
+                    ⚠️ Real-time connection lost. Attempting to reconnect...
+                </div>
+            `;
+            container.appendChild(connectionAlert);
+        });
+
+        // Error handling
+        pusher.connection.bind('error', function(err) {
+            console.error('Pusher connection error:', err);
+        });
+
+        console.log('🚀 Emergency Real-time Notification System Initialized');
+    </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ use App\Models\HelpRequest;
 use App\Models\Shelter;
 use App\Models\Assignment;
 use App\Models\User;
+use App\Events\NewRequestSubmitted;
 use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
@@ -129,6 +130,9 @@ class RequestController extends Controller
         $validated['longitude'] = $coords['lng'];
 
         $helpRequest = HelpRequest::create($validated);
+
+        // Trigger real-time notification to admin dashboard
+        event(new NewRequestSubmitted($helpRequest));
 
         // Simulate admin availability check
         $adminOnline = $this->checkAdminAvailability();

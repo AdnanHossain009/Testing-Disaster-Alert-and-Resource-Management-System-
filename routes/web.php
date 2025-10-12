@@ -73,3 +73,30 @@ Route::prefix('citizen')->middleware('web')->group(function () {
 Route::get('/welcome', function () {
     return view('welcome');
 });
+
+// Test route for Pusher real-time functionality
+Route::get('/test-pusher', function () {
+    // Create a test emergency request
+    $testRequest = new \App\Models\HelpRequest([
+        'id' => 999,
+        'name' => 'Test Emergency User',
+        'phone' => '+8801234567890',
+        'location' => 'Test Location, Dhaka',
+        'request_type' => 'Shelter',
+        'urgency' => 'Critical',
+        'people_count' => 3,
+        'description' => 'This is a test emergency request for real-time notifications',
+        'latitude' => 23.8103,
+        'longitude' => 90.4125,
+        'created_at' => now(),
+    ]);
+    
+    // Broadcast test event
+    event(new \App\Events\NewRequestSubmitted($testRequest));
+    
+    return response()->json([
+        'message' => 'Test real-time notification sent!',
+        'instruction' => 'Check the admin dashboard for the notification',
+        'data' => $testRequest->toArray()
+    ]);
+});
