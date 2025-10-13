@@ -74,11 +74,111 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
+// API endpoint for dashboard statistics
+Route::get('/api/dashboard-stats', function () {
+    $stats = [
+        'total_alerts' => \App\Models\Alert::count(),
+        'pending' => \App\Models\HelpRequest::where('status', 'Pending')->count(),
+        'in_progress' => \App\Models\HelpRequest::where('status', 'In Progress')->count(),
+        'completed' => \App\Models\HelpRequest::where('status', 'Completed')->count(),
+    ];
+    
+    return response()->json([
+        'stats' => $stats,
+        'new_requests' => [], // For now, empty
+        'timestamp' => now()->toDateTimeString()
+    ]);
+});
+
+// Simple test page with buttons
+Route::get('/test-dashboard', function () {
+    return '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Dashboard Test Page</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .test-button { 
+                display: block; 
+                margin: 10px 0; 
+                padding: 15px 20px; 
+                background: #3498db; 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                width: 300px; 
+                text-align: center;
+            }
+            .test-button:hover { background: #2980b9; }
+            .result { 
+                margin: 10px 0; 
+                padding: 10px; 
+                border: 1px solid #ddd; 
+                border-radius: 5px; 
+                background: #f9f9f9; 
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Dashboard Testing Page</h1>
+        <p>Use these buttons to test the real-time dashboard features:</p>
+        
+        <a href="/test-pusher" target="_blank" class="test-button">
+            🚨 Test New Request Notification
+        </a>
+        
+        <a href="/test-status-update" target="_blank" class="test-button">
+            🔄 Test Status Update
+        </a>
+        
+        <a href="/admin/dashboard" target="_blank" class="test-button">
+            📊 Open Admin Dashboard
+        </a>
+        
+        <button onclick="testMultipleUpdates()" class="test-button" style="border: none; cursor: pointer;">
+            🔄 Test Multiple Status Updates
+        </button>
+        
+        <div id="results"></div>
+        
+        <script>
+            async function testMultipleUpdates() {
+                const results = document.getElementById("results");
+                results.innerHTML = "<h3>Testing Multiple Updates...</h3>";
+                
+                for(let i = 1; i <= 3; i++) {
+                    try {
+                        const response = await fetch("/test-status-update");
+                        const data = await response.json();
+                        
+                        results.innerHTML += `
+                            <div class="result">
+                                <strong>Test ${i}:</strong> ${data.message}<br>
+                                Request ID: ${data.data.request_id}<br>
+                                Status Change: ${data.data.old_status} → ${data.data.new_status}
+                            </div>
+                        `;
+                        
+                        // Wait 2 seconds between tests
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    } catch (error) {
+                        results.innerHTML += `<div class="result">❌ Test ${i} failed: ${error.message}</div>`;
+                    }
+                }
+                
+                results.innerHTML += "<div class=\"result\">✅ All tests completed! Check the admin dashboard for updates.</div>";
+            }
+        </script>
+    </body>
+    </html>
+    ';
+});
+
 // Test route for Pusher real-time functionality
 Route::get('/test-pusher', function () {
-    // Create a test emergency request
-    $testRequest = new \App\Models\HelpRequest([
-        'id' => 999,
+    // Create a test emergency request in the database
+    $testRequest = \App\Models\HelpRequest::create([
         'name' => 'Test Emergency User',
         'phone' => '+8801234567890',
         'location' => 'Test Location, Dhaka',
@@ -88,23 +188,28 @@ Route::get('/test-pusher', function () {
         'description' => 'This is a test emergency request for real-time notifications',
         'latitude' => 23.8103,
         'longitude' => 90.4125,
-        'created_at' => now(),
+        'status' => 'Pending',
+        'user_id' => 1
     ]);
     
-    // Broadcast test event
-    event(new \App\Events\NewRequestSubmitted($testRequest));
-    
     return response()->json([
-        'message' => 'Test real-time notification sent!',
-        'instruction' => 'Check the admin dashboard for the notification',
-        'data' => $testRequest->toArray()
+        'message' => 'Test emergency request created in database!',
+        'instruction' => 'Refresh the admin dashboard to see the new request',
+        'data' => [
+            'id' => $testRequest->id,
+            'name' => $testRequest->name,
+            'type' => $testRequest->request_type,
+            'urgency' => $testRequest->urgency,
+            'location' => $testRequest->location,
+            'status' => $testRequest->status
+        ]
     ]);
 });
 
 // Test route for status update functionality
 Route::get('/test-status-update', function () {
-    // Get the first available request or create a test one
-    $request = \App\Models\HelpRequest::first();
+    // Get the most recent request or create one
+    $request = \App\Models\HelpRequest::orderBy('id', 'desc')->first();
     
     if (!$request) {
         $request = \App\Models\HelpRequest::create([
@@ -130,19 +235,18 @@ Route::get('/test-status-update', function () {
     $nextIndex = ($currentIndex + 1) % count($statuses);
     $newStatus = $statuses[$nextIndex];
     
-    // Update status
+    // Update status in database
     $request->update(['status' => $newStatus]);
     
-    // Broadcast status update event
-    event(new \App\Events\RequestStatusUpdated($request, $oldStatus, $newStatus));
-    
     return response()->json([
-        'message' => 'Test status update sent!',
-        'instruction' => 'Check the admin dashboard for live status change',
+        'message' => 'Status updated in database!',
+        'instruction' => 'Refresh the admin dashboard to see the status change',
         'data' => [
             'request_id' => $request->id,
             'old_status' => $oldStatus,
-            'new_status' => $newStatus
+            'new_status' => $newStatus,
+            'name' => $request->name,
+            'type' => $request->request_type
         ]
     ]);
 });
