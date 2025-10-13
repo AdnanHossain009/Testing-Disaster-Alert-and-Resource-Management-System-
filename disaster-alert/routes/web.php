@@ -66,6 +66,7 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
+<<<<<<< HEAD:disaster-alert/disaster-alert/routes/web.php
 // SMS WEBHOOK AND API ROUTES
 Route::prefix('api/sms')->group(function () {
     Route::post('/webhook', [App\Http\Controllers\SMSController::class, 'webhook'])->name('sms.webhook');
@@ -79,4 +80,31 @@ Route::prefix('admin/sms')->middleware('web')->group(function () {
     Route::post('/send-manual', [App\Http\Controllers\SMSController::class, 'sendManualSMS'])->name('admin.sms.send_manual');
     Route::get('/test', [App\Http\Controllers\SMSController::class, 'testConnectivity'])->name('admin.sms.test');
     Route::get('/statistics', [App\Http\Controllers\SMSController::class, 'getStatistics'])->name('admin.sms.statistics');
+=======
+// Test route for Pusher real-time functionality
+Route::get('/test-pusher', function () {
+    // Create a test emergency request
+    $testRequest = new \App\Models\HelpRequest([
+        'id' => 999,
+        'name' => 'Test Emergency User',
+        'phone' => '+8801234567890',
+        'location' => 'Test Location, Dhaka',
+        'request_type' => 'Shelter',
+        'urgency' => 'Critical',
+        'people_count' => 3,
+        'description' => 'This is a test emergency request for real-time notifications',
+        'latitude' => 23.8103,
+        'longitude' => 90.4125,
+        'created_at' => now(),
+    ]);
+    
+    // Broadcast test event
+    event(new \App\Events\NewRequestSubmitted($testRequest));
+    
+    return response()->json([
+        'message' => 'Test real-time notification sent!',
+        'instruction' => 'Check the admin dashboard for the notification',
+        'data' => $testRequest->toArray()
+    ]);
+>>>>>>> 673687df68e6acffd84d053115f476fcc0b48879:routes/web.php
 });

@@ -8,6 +8,7 @@ use App\Models\Shelter;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Events\NewRequestSubmitted;
+use App\Events\RequestStatusUpdated;
 use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
@@ -329,6 +330,9 @@ class RequestController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $helpRequest = HelpRequest::findOrFail($id);
+        
+        // Store old status for event
+        $oldStatus = $helpRequest->status;
 
         $validated = $request->validate([
             'status' => 'required|in:Pending,Assigned,In Progress,Completed,Cancelled',
@@ -339,6 +343,9 @@ class RequestController extends Controller
             'status' => $validated['status'],
             'admin_notes' => $validated['admin_notes']
         ]);
+
+        // Broadcast real-time status update
+        event(new RequestStatusUpdated($helpRequest, $oldStatus, $validated['status']));
 
         return redirect()->route('admin.requests')->with('success', 'Request status updated successfully!');
     }

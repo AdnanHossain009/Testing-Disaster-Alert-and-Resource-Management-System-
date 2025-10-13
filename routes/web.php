@@ -100,3 +100,83 @@ Route::get('/test-pusher', function () {
         'data' => $testRequest->toArray()
     ]);
 });
+
+// Test route for status update functionality
+Route::get('/test-status-update', function () {
+    // Get the first available request or create a test one
+    $request = \App\Models\HelpRequest::first();
+    
+    if (!$request) {
+        $request = \App\Models\HelpRequest::create([
+            'name' => 'Test Status User',
+            'phone' => '+8801234567890',
+            'location' => 'Test Location, Dhaka',
+            'request_type' => 'Shelter',
+            'urgency' => 'Medium',
+            'people_count' => 2,
+            'description' => 'Test request for status updates',
+            'latitude' => 23.8103,
+            'longitude' => 90.4125,
+            'status' => 'Pending',
+            'user_id' => 1
+        ]);
+    }
+    
+    $oldStatus = $request->status;
+    $statuses = ['Pending', 'Assigned', 'In Progress', 'Completed'];
+    
+    // Cycle to next status
+    $currentIndex = array_search($oldStatus, $statuses);
+    $nextIndex = ($currentIndex + 1) % count($statuses);
+    $newStatus = $statuses[$nextIndex];
+    
+    // Update status
+    $request->update(['status' => $newStatus]);
+    
+    // Broadcast status update event
+    event(new \App\Events\RequestStatusUpdated($request, $oldStatus, $newStatus));
+    
+    return response()->json([
+        'message' => 'Test status update sent!',
+        'instruction' => 'Check the admin dashboard for live status change',
+        'data' => [
+            'request_id' => $request->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus
+        ]
+    ]);
+});
+
+// Test route for status update real-time functionality
+Route::get('/test-status-update', function () {
+    // Get the first available request
+    $request = \App\Models\HelpRequest::first();
+    
+    if (!$request) {
+        return response()->json([
+            'error' => 'No requests found in database. Create one first.'
+        ], 404);
+    }
+    
+    $oldStatus = $request->status;
+    
+    // Cycle through statuses
+    $statusCycle = ['Pending', 'Assigned', 'In Progress', 'Completed'];
+    $currentIndex = array_search($oldStatus, $statusCycle);
+    $newStatus = $statusCycle[($currentIndex + 1) % count($statusCycle)];
+    
+    $request->status = $newStatus;
+    $request->save();
+    
+    // Broadcast test status update event
+    event(new \App\Events\RequestStatusUpdated($request, $oldStatus, $newStatus));
+    
+    return response()->json([
+        'message' => 'Test status update sent!',
+        'instruction' => 'Check the admin dashboard for the live status update',
+        'request_id' => $request->id,
+        'old_status' => $oldStatus,
+        'new_status' => $newStatus,
+        'data' => $request->toArray()
+    ]);
+});

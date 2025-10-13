@@ -238,28 +238,28 @@
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card alerts">
-                <div class="stat-number">{{ $stats['total_alerts'] }}</div>
+                <div class="stat-number" data-stat="total-alerts">{{ $stats['total_alerts'] }}</div>
                 <div class="stat-label">Total Alerts</div>
             </div>
             <div class="stat-card alerts">
-                <div class="stat-number">{{ $stats['active_alerts'] }}</div>
+                <div class="stat-number" data-stat="active-alerts">{{ $stats['active_alerts'] }}</div>
                 <div class="stat-label">Active Alerts</div>
             </div>
             <div class="stat-card shelters">
-                <div class="stat-number">{{ $stats['total_shelters'] }}</div>
+                <div class="stat-number" data-stat="total-shelters">{{ $stats['total_shelters'] }}</div>
                 <div class="stat-label">Total Shelters</div>
             </div>
             <div class="stat-card shelters">
-                <div class="stat-number">{{ $stats['available_shelters'] }}</div>
+                <div class="stat-number" data-stat="available-shelters">{{ $stats['available_shelters'] }}</div>
                 <div class="stat-label">Available Shelters</div>
             </div>
             <div class="stat-card requests">
-                <div class="stat-number">{{ $stats['pending_requests'] }}</div>
+                <div class="stat-number" data-stat="pending">{{ $stats['pending_requests'] }}</div>
                 <div class="stat-label">Pending Requests</div>
             </div>
             <div class="stat-card requests">
-                <div class="stat-number">{{ $stats['assigned_requests'] }}</div>
-                <div class="stat-label">Assigned Requests</div>
+                <div class="stat-number" data-stat="in-progress">{{ $stats['assigned_requests'] }}</div>
+                <div class="stat-label">In Progress</div>
             </div>
         </div>
 
@@ -548,5 +548,176 @@
 
         console.log('🚀 Emergency Real-time Notification System Initialized');
     </script>
+
+    <!-- Live Dashboard Updates Styles -->
+    <style>
+        /* New row animation */
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .new-row-animation {
+            animation: slideInFromTop 0.5s ease-out;
+        }
+        
+        /* Highlight row effect */
+        .highlight-row {
+            background-color: #fff3cd !important;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Status badge pulse animation */
+        @keyframes statusPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        .status-update-pulse {
+            animation: statusPulse 0.6s ease-in-out;
+        }
+        
+        /* Stat counter animation */
+        @keyframes statPulse {
+            0%, 100% {
+                transform: scale(1);
+                color: inherit;
+            }
+            50% {
+                transform: scale(1.15);
+                color: #3498db;
+            }
+        }
+        
+        .stat-update-pulse {
+            animation: statPulse 0.6s ease-in-out;
+            font-weight: bold;
+        }
+        
+        /* Update indicator */
+        .update-indicator {
+            position: fixed;
+            top: 80px;
+            right: -350px;
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            font-size: 14px;
+            max-width: 300px;
+        }
+        
+        .update-indicator.show {
+            right: 20px;
+        }
+        
+        .update-indicator.success {
+            background: #27ae60;
+        }
+        
+        .update-indicator.info {
+            background: #3498db;
+        }
+        
+        .update-indicator.warning {
+            background: #f39c12;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        
+        .status-assigned,
+        .status-in-progress {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+        
+        .status-completed {
+            background: #55efc4;
+            color: #00b894;
+        }
+        
+        .status-cancelled {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+        
+        /* Urgency badges */
+        .urgency-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .urgency-critical {
+            background: #ff7675;
+            color: #d63031;
+        }
+        
+        .urgency-high {
+            background: #fdcb6e;
+            color: #e17055;
+        }
+        
+        .urgency-medium {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+        
+        .urgency-low {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+        
+        /* Live indicator dot */
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #27ae60;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+
+    <!-- Include Live Dashboard JavaScript -->
+    @vite(['resources/js/live-dashboard.js'])
 </body>
 </html>
