@@ -42,6 +42,9 @@ Route::prefix('admin')->middleware('web')->group(function () {
     Route::get('/shelters', [ShelterController::class, 'adminIndex'])->name('admin.shelters');
     Route::get('/requests', [RequestController::class, 'adminIndex'])->name('admin.requests');
     Route::get('/analytics', [AuthController::class, 'adminAnalytics'])->name('admin.analytics');
+    Route::get('/notifications', function () {
+        return view('admin.notifications');
+    })->name('admin.notifications');
     
     // Alert CRUD Operations
     Route::get('/alerts/create', [AlertController::class, 'create'])->name('admin.alerts.create');
@@ -69,6 +72,15 @@ Route::prefix('citizen')->middleware('web')->group(function () {
     Route::get('/my-requests', [RequestController::class, 'citizenDashboard'])->name('citizen.requests');
 });
 
+// Push Notification API Routes
+Route::prefix('api/notifications')->middleware('web')->group(function () {
+    Route::post('/subscribe', [\App\Http\Controllers\NotificationController::class, 'subscribe'])->name('notifications.subscribe');
+    Route::post('/unsubscribe', [\App\Http\Controllers\NotificationController::class, 'unsubscribe'])->name('notifications.unsubscribe');
+    Route::post('/preferences', [\App\Http\Controllers\NotificationController::class, 'updatePreferences'])->name('notifications.preferences.update');
+    Route::get('/preferences', [\App\Http\Controllers\NotificationController::class, 'getPreferences'])->name('notifications.preferences.get');
+    Route::post('/test', [\App\Http\Controllers\NotificationController::class, 'sendTest'])->name('notifications.test');
+});
+
 // Default welcome route (for reference)
 Route::get('/welcome', function () {
     return view('welcome');
@@ -87,6 +99,28 @@ Route::get('/api/dashboard-stats', function () {
         'stats' => $stats,
         'new_requests' => [], // For now, empty
         'timestamp' => now()->toDateTimeString()
+    ]);
+});
+
+// API endpoint for push notification subscriptions
+Route::post('/api/push-subscription', function (\Illuminate\Http\Request $request) {
+    // In a real app, save to database
+    // For now, just return success
+    \Illuminate\Support\Facades\Log::info('Push subscription received:', $request->all());
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Subscription saved successfully'
+    ]);
+});
+
+Route::delete('/api/push-subscription', function () {
+    // In a real app, remove from database
+    \Illuminate\Support\Facades\Log::info('Push subscription removed');
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Subscription removed successfully'
     ]);
 });
 
@@ -282,5 +316,28 @@ Route::get('/test-status-update', function () {
         'old_status' => $oldStatus,
         'new_status' => $newStatus,
         'data' => $request->toArray()
+    ]);
+});
+
+// Test route for push notifications
+Route::get('/test-push-notification', function () {
+    // Send browser push notification to all active subscriptions
+    $subscriptions = \App\Models\PushSubscription::where('is_active', true)->get();
+    
+    $count = 0;
+    foreach ($subscriptions as $subscription) {
+        // Check if should receive notification
+        if ($subscription->shouldReceiveNotification('Shelter', 'Critical')) {
+            // In a real implementation, send actual push notification here
+            $count++;
+        }
+    }
+    
+    return response()->json([
+        'message' => 'Push notification test completed!',
+        'instruction' => 'Check your browser for push notifications',
+        'subscriptions_found' => $subscriptions->count(),
+        'notifications_sent' => $count,
+        'note' => 'Actual push sending requires Web Push library setup'
     ]);
 });

@@ -8,7 +8,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css', 
                 'resources/js/app.js',
-                'resources/js/live-dashboard.js'
+                'resources/js/live-dashboard.js',
+                'resources/js/push-notifications.js'
             ],
             refresh: true,
         }),

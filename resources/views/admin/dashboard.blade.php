@@ -295,9 +295,9 @@
                 <a href="#" class="action-btn danger">🚨 Create New Alert</a>
                 <a href="#" class="action-btn success">🏠 Add New Shelter</a>
                 <a href="{{ route('admin.requests') }}" class="action-btn primary">📋 Review Requests</a>
-                <a href="#" class="action-btn">📊 View Analytics</a>
-                <a href="#" class="action-btn">🗺️ Map Overview</a>
-                <a href="#" class="action-btn">📱 Send Notifications</a>
+                <a href="{{ route('admin.notifications') }}" class="action-btn">� Notification Settings</a>
+                <a href="#" class="action-btn">� View Analytics</a>
+                <a href="#" class="action-btn">�️ Map Overview</a>
 
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
                     <div class="section-title">📈 System Health</div>

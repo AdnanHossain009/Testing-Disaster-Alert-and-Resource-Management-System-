@@ -49,9 +49,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Unsubscribe from push notifications
-     */
+    // Unsubscribe from push notifications
     public function unsubscribe(Request $request)
     {
         $validated = $request->validate([
@@ -69,9 +67,9 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Update notification preferences
-     */
+    
+     //Update notification preferences
+     
     public function updatePreferences(Request $request)
     {
         $validated = $request->validate([
