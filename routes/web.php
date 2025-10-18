@@ -72,6 +72,9 @@ Route::prefix('citizen')->middleware('web')->group(function () {
     Route::get('/my-requests', [RequestController::class, 'citizenDashboard'])->name('citizen.requests');
 });
 
+// Alternative route name for backward compatibility
+Route::get('/citizen/my-requests', [RequestController::class, 'citizenDashboard'])->name('requests.citizen-dashboard');
+
 // Push Notification API Routes
 Route::prefix('api/notifications')->middleware('web')->group(function () {
     Route::post('/subscribe', [\App\Http\Controllers\NotificationController::class, 'subscribe'])->name('notifications.subscribe');

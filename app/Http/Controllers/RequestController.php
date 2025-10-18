@@ -7,6 +7,7 @@ use App\Models\HelpRequest;
 use App\Models\Shelter;
 use App\Models\Assignment;
 use App\Models\User;
+use App\Models\Alert;
 use App\Events\NewRequestSubmitted;
 use App\Events\RequestStatusUpdated;
 use Illuminate\Support\Facades\Auth;
@@ -197,19 +198,45 @@ class RequestController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $requests = $helpRequests->map(function($req) {
+        $myRequests = $helpRequests->map(function($req) {
             return [
                 'id' => $req->id,
                 'emergency_type' => $req->request_type,
                 'description' => $req->description,
                 'status' => $req->status,
-                'assigned_shelter' => $req->assignment ? $req->assignment->shelter->name : null,
-                'created_at' => $req->created_at->format('Y-m-d H:i:s'),
-                'assigned_at' => $req->assigned_at ? $req->assigned_at->format('Y-m-d H:i:s') : null
+                'shelter' => $req->assignment ? $req->assignment->shelter->name : null,
+                'submitted' => $req->created_at->format('M d, Y'),
             ];
         });
 
-        return view('citizen.requests', compact('requests', 'helpRequests'));
+        // Get active alerts
+        $activeAlerts = Alert::where('status', 'Active')
+            ->orderBy('issued_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function($alert) {
+                return [
+                    'title' => $alert->title,
+                    'severity' => $alert->severity,
+                    'issued' => $alert->issued_at ? \Carbon\Carbon::parse($alert->issued_at)->format('M d, Y') : 'N/A'
+                ];
+            });
+
+        // Get nearest shelters
+        $nearestShelters = Shelter::where('status', 'Active')
+            ->limit(3)
+            ->get()
+            ->map(function($shelter) {
+                $available = $shelter->capacity - $shelter->current_occupancy;
+                return [
+                    'name' => $shelter->name,
+                    'distance' => '0 km', // Placeholder - would need user location for real distance
+                    'availability' => $available > 0 ? 'Available' : 'Full',
+                    'capacity' => $shelter->current_occupancy . '/' . $shelter->capacity . ' occupied'
+                ];
+            });
+
+        return view('citizen.dashboard', compact('myRequests', 'activeAlerts', 'nearestShelters', 'helpRequests'));
     }
 
     /**
