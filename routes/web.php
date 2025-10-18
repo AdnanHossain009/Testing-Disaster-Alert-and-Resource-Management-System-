@@ -5,6 +5,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AnalyticsController;
 
 // Public Dashboard route
 Route::get('/', [AlertController::class, 'dashboard'])->name('dashboard');
@@ -41,7 +42,9 @@ Route::prefix('admin')->middleware('web')->group(function () {
     Route::get('/alerts', [AlertController::class, 'adminIndex'])->name('admin.alerts');
     Route::get('/shelters', [ShelterController::class, 'adminIndex'])->name('admin.shelters');
     Route::get('/requests', [RequestController::class, 'adminIndex'])->name('admin.requests');
-    Route::get('/analytics', [AuthController::class, 'adminAnalytics'])->name('admin.analytics');
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('admin.analytics');
+    Route::get('/analytics/export/pdf', [AnalyticsController::class, 'exportPDF'])->name('analytics.export.pdf');
+    Route::get('/analytics/export/txt', [AnalyticsController::class, 'exportTXT'])->name('analytics.export.txt');
     Route::get('/notifications', function () {
         return view('admin.notifications');
     })->name('admin.notifications');

@@ -522,23 +522,11 @@
         });
 
         pusher.connection.bind('disconnected', function() {
-            console.log('❌ Real-time connection lost');
+            console.log('❌ Real-time connection lost - Using auto-refresh fallback');
             
-            // Show connection status notification
-            const container = document.getElementById('notifications-container');
-            const connectionAlert = document.createElement('div');
-            connectionAlert.innerHTML = `
-                <div style="
-                    background: #f39c12;
-                    color: white;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin-bottom: 10px;
-                ">
-                    ⚠️ Real-time connection lost. Attempting to reconnect...
-                </div>
-            `;
-            container.appendChild(connectionAlert);
+            // DISABLED: Toast notification (annoying when Pusher not configured)
+            // Auto-refresh fallback handles updates automatically every 2 minutes
+            // No need to show error since page will refresh and get latest data
         });
 
         // Error handling

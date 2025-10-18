@@ -333,7 +333,7 @@ class LiveDashboard {
 
         window.Echo.connector.pusher.connection.bind('disconnected', () => {
             this.connectionLost = true;
-            this.showUpdateIndicator('Connection lost. Switching to fallback mode...', 'warning');
+            // DISABLED: Toast notification (fallback mode handles updates silently)
             console.warn('⚠️ WebSocket disconnected. Auto-refresh activated.');
         });
 
