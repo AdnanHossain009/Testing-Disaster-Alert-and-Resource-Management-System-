@@ -6,17 +6,22 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\HelpRequest;
 
 class StatusUpdatedNotification extends Notification
 {
     use Queueable;
 
+    public $request;
+    public $oldStatus;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(HelpRequest $request, string $oldStatus)
     {
-        //
+        $this->request = $request;
+        $this->oldStatus = $oldStatus;
     }
 
     /**
@@ -35,9 +40,11 @@ class StatusUpdatedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('📋 Status Updated: ' . $this->oldStatus . ' → ' . $this->request->status)
+            ->view('emails.status-updated', [
+                'request' => $this->request,
+                'oldStatus' => $this->oldStatus
+            ]);
     }
 
     /**
@@ -48,7 +55,10 @@ class StatusUpdatedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'request_id' => $this->request->id,
+            'old_status' => $this->oldStatus,
+            'new_status' => $this->request->status,
+            'request_type' => $this->request->request_type,
         ];
     }
 }
