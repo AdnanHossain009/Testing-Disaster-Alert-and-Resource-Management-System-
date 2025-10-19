@@ -77,9 +77,20 @@
 <body>
     <div class="admin-header">
         <h1>📋 Admin Panel - Manage Requests</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <a href="{{ route('admin.inbox') }}" style="position: relative; text-decoration: none; color: white; font-size: 1.5rem;">
+                🔔
+                @php
+                    $unseenCount = \App\Models\InAppNotification::forAdmin()->unseen()->count();
+                @endphp
+                @if($unseenCount > 0)
+                <span style="position: absolute; top: -8px; right: -8px; background: #f56565; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    {{ $unseenCount }}
+                </span>
+                @endif
+            </a>
             <span>Welcome, {{ Auth::user()->name }}</span>
-            <a href="{{ route('auth.logout') }}" style="margin-left: 1rem; color: #fed7d7;">Logout</a>
+            <a href="{{ route('auth.logout') }}" style="color: #fed7d7;">Logout</a>
         </div>
     </div>
 
@@ -89,6 +100,7 @@
         <a href="{{ route('admin.shelters') }}">Manage Shelters</a>
         <a href="{{ route('admin.requests') }}" class="active">Manage Requests</a>
         <a href="{{ route('admin.analytics') }}">Analytics</a>
+        <a href="{{ route('admin.inbox') }}">📬 Notifications</a>
     </div>
 
     <div class="container">

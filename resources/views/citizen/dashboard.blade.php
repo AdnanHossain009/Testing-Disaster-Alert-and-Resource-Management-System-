@@ -114,7 +114,18 @@
 <body>
     <div class="header">
         <h1>🏠 Citizen Dashboard</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="{{ route('citizen.inbox') }}" style="position: relative; text-decoration: none; color: #2d3748; font-size: 1.5rem;">
+                🔔
+                @php
+                    $unseenCount = \App\Models\InAppNotification::forCitizen(Auth::id())->unseen()->count();
+                @endphp
+                @if($unseenCount > 0)
+                <span style="position: absolute; top: -8px; right: -8px; background: #e53e3e; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    {{ $unseenCount }}
+                </span>
+                @endif
+            </a>
             <span class="user-info">Welcome, {{ Auth::user()->name }}</span>
             <a href="{{ route('auth.logout') }}" class="logout-btn">Logout</a>
         </div>

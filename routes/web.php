@@ -78,6 +78,16 @@ Route::prefix('citizen')->middleware('web')->group(function () {
 // Alternative route name for backward compatibility
 Route::get('/citizen/my-requests', [RequestController::class, 'citizenDashboard'])->name('requests.citizen-dashboard');
 
+// Inbox Notification Routes
+Route::middleware('web')->group(function () {
+    Route::get('/admin/inbox', [\App\Http\Controllers\NotificationController::class, 'adminInbox'])->name('admin.inbox');
+    Route::get('/citizen/inbox', [\App\Http\Controllers\NotificationController::class, 'citizenInbox'])->name('citizen.inbox');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/admin/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAdminAsRead'])->name('notifications.admin.read-all');
+    Route::post('/notifications/citizen/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllCitizenAsRead'])->name('notifications.citizen.read-all');
+    Route::get('/api/notifications/unseen-count', [\App\Http\Controllers\NotificationController::class, 'getUnseenCount'])->name('notifications.unseen-count');
+});
+
 // Push Notification API Routes
 Route::prefix('api/notifications')->middleware('web')->group(function () {
     Route::post('/subscribe', [\App\Http\Controllers\NotificationController::class, 'subscribe'])->name('notifications.subscribe');

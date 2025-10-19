@@ -4,10 +4,121 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PushSubscription;
+use App\Models\InAppNotification;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    /**
+     * Show admin inbox
+     */
+    public function adminInbox(Request $request)
+    {
+        $filter = $request->get('filter', 'all'); // all, unseen, alert_created, etc.
+        
+        $query = InAppNotification::forAdmin()->latest();
+        
+        if ($filter === 'unseen') {
+            $query->unseen();
+        } elseif (in_array($filter, ['alert_created', 'request_submitted', 'shelter_assigned', 'status_updated'])) {
+            $query->ofType($filter);
+        }
+        
+        $notifications = $query->paginate(20);
+        $unseenCount = InAppNotification::forAdmin()->unseen()->count();
+        
+        $stats = [
+            'total' => InAppNotification::forAdmin()->count(),
+            'unseen' => $unseenCount,
+            'alert_created' => InAppNotification::forAdmin()->ofType('alert_created')->count(),
+            'request_submitted' => InAppNotification::forAdmin()->ofType('request_submitted')->count(),
+            'shelter_assigned' => InAppNotification::forAdmin()->ofType('shelter_assigned')->count(),
+            'status_updated' => InAppNotification::forAdmin()->ofType('status_updated')->count(),
+        ];
+        
+        return view('admin.inbox', compact('notifications', 'stats', 'filter', 'unseenCount'));
+    }
+
+    /**
+     * Show citizen inbox
+     */
+    public function citizenInbox(Request $request)
+    {
+        $filter = $request->get('filter', 'all');
+        $userId = Auth::id();
+        
+        $query = InAppNotification::forCitizen($userId)->latest();
+        
+        if ($filter === 'unseen') {
+            $query->unseen();
+        } elseif (in_array($filter, ['request_submitted', 'shelter_assigned', 'status_updated'])) {
+            $query->ofType($filter);
+        }
+        
+        $notifications = $query->paginate(20);
+        $unseenCount = InAppNotification::forCitizen($userId)->unseen()->count();
+        
+        $stats = [
+            'total' => InAppNotification::forCitizen($userId)->count(),
+            'unseen' => $unseenCount,
+            'request_submitted' => InAppNotification::forCitizen($userId)->ofType('request_submitted')->count(),
+            'shelter_assigned' => InAppNotification::forCitizen($userId)->ofType('shelter_assigned')->count(),
+            'status_updated' => InAppNotification::forCitizen($userId)->ofType('status_updated')->count(),
+        ];
+        
+        return view('citizen.inbox', compact('notifications', 'stats', 'filter', 'unseenCount'));
+    }
+
+    /**
+     * Mark notification as read
+     */
+    public function markAsRead($id)
+    {
+        $notification = InAppNotification::findOrFail($id);
+        $notification->markAsSeen();
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all as read (Admin)
+     */
+    public function markAllAdminAsRead()
+    {
+        $service = new NotificationService();
+        $service->markAllAdminAsSeen();
+        
+        return redirect()->back()->with('success', 'All notifications marked as read');
+    }
+
+    /**
+     * Mark all as read (Citizen)
+     */
+    public function markAllCitizenAsRead()
+    {
+        $service = new NotificationService();
+        $service->markAllCitizenAsSeen(Auth::id());
+        
+        return redirect()->back()->with('success', 'All notifications marked as read');
+    }
+
+    /**
+     * Get unseen count (AJAX)
+     */
+    public function getUnseenCount()
+    {
+        $user = Auth::user();
+        
+        if ($user->role === 'admin') {
+            $count = InAppNotification::forAdmin()->unseen()->count();
+        } else {
+            $count = InAppNotification::forCitizen($user->id)->unseen()->count();
+        }
+        
+        return response()->json(['count' => $count]);
+    }
+
     /**
      * Show notification settings page
      */

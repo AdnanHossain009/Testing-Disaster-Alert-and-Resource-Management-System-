@@ -204,6 +204,17 @@
             <h1>🛡️ Admin Control Panel</h1>
         </div>
         <div class="header-right">
+            <a href="{{ route('admin.inbox') }}" style="position: relative; text-decoration: none; color: white; font-size: 1.5rem; margin-right: 1rem;">
+                🔔
+                @php
+                    $unseenCount = \App\Models\InAppNotification::forAdmin()->unseen()->count();
+                @endphp
+                @if($unseenCount > 0)
+                <span style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    {{ $unseenCount }}
+                </span>
+                @endif
+            </a>
             <div class="user-info">
                 Welcome, {{ Auth::user()->name }} (Administrator)
             </div>
@@ -218,7 +229,7 @@
             <a href="{{ route('admin.shelters') }}">Manage Shelters</a>
             <a href="{{ route('admin.requests') }}">Manage Requests</a>
             <a href="{{ route('admin.analytics') }}">Analytics</a>
-            <a href="#">Settings</a>
+            <a href="{{ route('admin.inbox') }}">📬 Notifications</a>
         </div>
     </div>
 
