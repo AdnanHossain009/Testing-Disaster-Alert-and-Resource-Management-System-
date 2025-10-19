@@ -133,6 +133,18 @@ class RequestController extends Controller
 
         $helpRequest = HelpRequest::create($validated);
 
+        // Send notifications (in-app + email)
+        $notificationService = new \App\Services\NotificationService();
+        $notificationService->notifyRequestSubmitted($helpRequest);
+
+        // Send email to citizen
+        if ($helpRequest->user_id) {
+            $user = User::find($helpRequest->user_id);
+            if ($user) {
+                $user->notify(new \App\Notifications\RequestSubmittedNotification($helpRequest));
+            }
+        }
+
         // Trigger real-time notification to admin dashboard
         event(new NewRequestSubmitted($helpRequest));
 
@@ -271,7 +283,7 @@ class RequestController extends Controller
         }
 
         // Create assignment
-        Assignment::create([
+        $assignment = Assignment::create([
             'request_id' => $helpRequest->id,
             'shelter_id' => $validated['shelter_id'],
             'assigned_by' => Auth::id(),
@@ -290,6 +302,19 @@ class RequestController extends Controller
 
         // Update shelter occupancy
         $shelter->increment('current_occupancy', $helpRequest->people_count ?? 1);
+
+        // Send notifications (in-app + email)
+        $assignment->load(['shelter', 'request']); // Load relationships
+        $notificationService = new \App\Services\NotificationService();
+        $notificationService->notifyShelterAssigned($assignment);
+
+        // Send email to citizen
+        if ($helpRequest->user_id) {
+            $user = User::find($helpRequest->user_id);
+            if ($user) {
+                $user->notify(new \App\Notifications\ShelterAssignedNotification($assignment));
+            }
+        }
 
         return redirect()->route('admin.requests')->with('success', 'Request assigned successfully!');
     }
@@ -370,6 +395,18 @@ class RequestController extends Controller
             'status' => $validated['status'],
             'admin_notes' => $validated['admin_notes']
         ]);
+
+        // Send notifications (in-app + email)
+        $notificationService = new \App\Services\NotificationService();
+        $notificationService->notifyStatusUpdated($helpRequest, $oldStatus);
+
+        // Send email to citizen
+        if ($helpRequest->user_id) {
+            $user = User::find($helpRequest->user_id);
+            if ($user) {
+                $user->notify(new \App\Notifications\StatusUpdatedNotification($helpRequest, $oldStatus));
+            }
+        }
 
         // Broadcast real-time status update
         event(new RequestStatusUpdated($helpRequest, $oldStatus, $validated['status']));

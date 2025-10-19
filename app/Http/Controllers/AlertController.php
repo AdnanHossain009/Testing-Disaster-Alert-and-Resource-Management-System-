@@ -98,7 +98,15 @@ class AlertController extends Controller
         $validated['issued_at'] = now();
         $validated['status'] = 'Active';
 
-        Alert::create($validated);
+        $alert = Alert::create($validated);
+
+        // Send notifications
+        $notificationService = new \App\Services\NotificationService();
+        $notificationService->notifyAlertCreated($alert);
+
+        // Send email to admin (optional - you can add email list here)
+        // \Notification::route('mail', 'admin@disaster.gov.bd')
+        //     ->notify(new \App\Notifications\AlertCreatedNotification($alert));
 
         return redirect()->route('admin.alerts')->with('success', 'Alert created successfully!');
     }
