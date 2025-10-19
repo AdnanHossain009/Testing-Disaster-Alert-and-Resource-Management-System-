@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Admin Dashboard - Disaster Alert System</title>
     <style>
         body {
@@ -199,39 +203,8 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-left">
-            <h1>🛡️ Admin Control Panel</h1>
-        </div>
-        <div class="header-right">
-            <a href="{{ route('admin.inbox') }}" style="position: relative; text-decoration: none; color: white; font-size: 1.5rem; margin-right: 1rem;">
-                🔔
-                @php
-                    $unseenCount = \App\Models\InAppNotification::forAdmin()->unseen()->count();
-                @endphp
-                @if($unseenCount > 0)
-                <span style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                    {{ $unseenCount }}
-                </span>
-                @endif
-            </a>
-            <div class="user-info">
-                Welcome, {{ Auth::user()->name }} (Administrator)
-            </div>
-            <a href="{{ route('auth.logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </div>
-
-    <div class="nav">
-        <div class="nav-content">
-            <a href="{{ route('admin.dashboard') }}" class="active">Dashboard</a>
-            <a href="{{ route('admin.alerts') }}">Manage Alerts</a>
-            <a href="{{ route('admin.shelters') }}">Manage Shelters</a>
-            <a href="{{ route('admin.requests') }}">Manage Requests</a>
-            <a href="{{ route('admin.analytics') }}">Analytics</a>
-            <a href="{{ route('admin.inbox') }}">📬 Notifications</a>
-        </div>
-    </div>
+    @section('page_title', '�️ Admin Control Panel')
+    @include('admin.partials.header')
 
     <div class="container">
         <!-- Welcome Section -->

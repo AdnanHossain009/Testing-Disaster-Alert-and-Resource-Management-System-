@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Analytics Dashboard - Disaster Alert System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -184,7 +188,20 @@
 </head>
 <body>
     <div class="analytics-container">
-        <a href="{{ route('admin.dashboard') }}" class="back-link">← Back to Dashboard</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <a href="{{ route('admin.dashboard') }}" class="back-link">← Back to Dashboard</a>
+            <a href="{{ route('admin.inbox') }}" style="position: relative; text-decoration: none; color: #667eea; font-size: 1.5rem;">
+                🔔
+                @php
+                    $unseenCount = \App\Models\InAppNotification::forAdmin()->unseen()->count();
+                @endphp
+                @if($unseenCount > 0)
+                <span style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    {{ $unseenCount }}
+                </span>
+                @endif
+            </a>
+        </div>
         
         <div class="header">
             <div class="export-buttons">

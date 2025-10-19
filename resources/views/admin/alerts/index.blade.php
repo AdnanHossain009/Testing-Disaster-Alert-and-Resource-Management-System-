@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Admin - Manage Alerts</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,21 +36,8 @@
     </style>
 </head>
 <body>
-    <div class="admin-header">
-        <h1>🛡️ Admin Panel - Manage Alerts</h1>
-        <div>
-            <span>Welcome, {{ Auth::user()->name }}</span>
-            <a href="{{ route('auth.logout') }}" style="margin-left: 1rem; color: #fed7d7;">Logout</a>
-        </div>
-    </div>
-
-    <div class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-        <a href="{{ route('admin.alerts') }}" class="active">Manage Alerts</a>
-        <a href="{{ route('admin.shelters') }}">Manage Shelters</a>
-        <a href="{{ route('admin.requests') }}">Manage Requests</a>
-        <a href="{{ route('admin.analytics') }}">Analytics</a>
-    </div>
+    @section('page_title', '�️ Admin Panel - Manage Alerts')
+    @include('admin.partials.header')
 
     <div class="container">
         <!-- Action Buttons -->

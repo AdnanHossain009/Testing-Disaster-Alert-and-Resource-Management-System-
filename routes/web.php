@@ -36,8 +36,8 @@ Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name(
 Route::get('/citizen/dashboard', [AuthController::class, 'citizenDashboard'])->name('citizen.dashboard');
 Route::get('/relief/dashboard', [AuthController::class, 'reliefDashboard'])->name('relief.dashboard');
 
-// Admin routes (protected)
-Route::prefix('admin')->middleware('web')->group(function () {
+// Admin routes (protected) - Apply nocache to prevent stale header/nav rendering
+Route::prefix('admin')->middleware('nocache')->group(function () {
     // Admin Dashboard
     Route::get('/alerts', [AlertController::class, 'adminIndex'])->name('admin.alerts');
     Route::get('/shelters', [ShelterController::class, 'adminIndex'])->name('admin.shelters');
@@ -71,15 +71,15 @@ Route::prefix('admin')->middleware('web')->group(function () {
 });
 
 // Citizen routes (protected)
-Route::prefix('citizen')->middleware('web')->group(function () {
+Route::prefix('citizen')->middleware('nocache')->group(function () {
     Route::get('/my-requests', [RequestController::class, 'citizenDashboard'])->name('citizen.requests');
 });
 
 // Alternative route name for backward compatibility
 Route::get('/citizen/my-requests', [RequestController::class, 'citizenDashboard'])->name('requests.citizen-dashboard');
 
-// Inbox Notification Routes
-Route::middleware('web')->group(function () {
+// Inbox Notification Routes - Apply nocache for fresh notification counts
+Route::middleware('nocache')->group(function () {
     Route::get('/admin/inbox', [\App\Http\Controllers\NotificationController::class, 'adminInbox'])->name('admin.inbox');
     Route::get('/citizen/inbox', [\App\Http\Controllers\NotificationController::class, 'citizenInbox'])->name('citizen.inbox');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -88,8 +88,8 @@ Route::middleware('web')->group(function () {
     Route::get('/api/notifications/unseen-count', [\App\Http\Controllers\NotificationController::class, 'getUnseenCount'])->name('notifications.unseen-count');
 });
 
-// Push Notification API Routes
-Route::prefix('api/notifications')->middleware('web')->group(function () {
+// Push Notification API Routes - No nocache for API endpoints (they need normal caching)
+Route::prefix('api/notifications')->group(function () {
     Route::post('/subscribe', [\App\Http\Controllers\NotificationController::class, 'subscribe'])->name('notifications.subscribe');
     Route::post('/unsubscribe', [\App\Http\Controllers\NotificationController::class, 'unsubscribe'])->name('notifications.unsubscribe');
     Route::post('/preferences', [\App\Http\Controllers\NotificationController::class, 'updatePreferences'])->name('notifications.preferences.update');
