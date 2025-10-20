@@ -16,36 +16,41 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0D1326;
             min-height: 100vh;
+            color: #E4E8F5;
         }
         .header {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
+            background: #091F57;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
         .header h1 {
-            color: #2d3748;
+            color: #E4E8F5;
             font-size: 1.8rem;
         }
         .user-info {
-            color: #4a5568;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-right: 1rem;
         }
         .logout-btn {
-            background: #e53e3e;
+            background: #ff6b6b;
             color: white;
             padding: 0.5rem 1rem;
             text-decoration: none;
             border-radius: 5px;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            font-weight: 500;
         }
         .logout-btn:hover {
-            background: #c53030;
+            background: #ff8787;
+            transform: translateY(-2px);
         }
         .container {
             max-width: 1200px;
@@ -58,74 +63,118 @@
             gap: 2rem;
             margin-top: 2rem;
         }
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .card {
-            background: white;
+            background: #091F57;
             border-radius: 10px;
             padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .card h3 {
-            color: #2d3748;
+            color: #E4E8F5;
             margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
         .alert-item {
             padding: 0.75rem;
-            border-left: 4px solid #e53e3e;
-            background: #fed7d7;
+            border-left: 4px solid #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
             margin-bottom: 0.5rem;
             border-radius: 0 5px 5px 0;
+            color: #E4E8F5;
         }
         .request-item {
             padding: 0.75rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(43, 85, 189, 0.3);
             margin-bottom: 0.5rem;
             border-radius: 5px;
+            background: rgba(43, 85, 189, 0.05);
+            color: #E4E8F5;
         }
-        .status-assigned { border-left-color: #48bb78; }
-        .status-pending { border-left-color: #ed8936; }
+        .status-assigned { border-left: 3px solid #51cf66; background: rgba(81, 207, 102, 0.1); }
+        .status-pending { border-left: 3px solid #ffa94d; background: rgba(255, 169, 77, 0.1); }
         .shelter-item {
             padding: 0.75rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(43, 85, 189, 0.3);
             margin-bottom: 0.5rem;
             border-radius: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(43, 85, 189, 0.05);
+            color: #E4E8F5;
         }
         .btn {
-            background: #4299e1;
+            background: #2B55BD;
             color: white;
             padding: 0.75rem 1.5rem;
             text-decoration: none;
             border-radius: 5px;
             display: inline-block;
             margin-top: 1rem;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
+            font-weight: 500;
         }
         .btn:hover {
-            background: #3182ce;
+            background: #3d6fd4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 85, 189, 0.5);
         }
         .btn-emergency {
-            background: #e53e3e;
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
             font-size: 1.1rem;
             font-weight: bold;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
         }
         .btn-emergency:hover {
-            background: #c53030;
+            background: linear-gradient(135deg, #ff8787, #ffa0a0);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+        }
+        .notification-bell {
+            position: relative;
+            text-decoration: none;
+            color: #E4E8F5;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+        .notification-bell:hover {
+            transform: scale(1.1);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🏠 Citizen Dashboard</h1>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="{{ route('citizen.inbox') }}" style="position: relative; text-decoration: none; color: #2d3748; font-size: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ route('citizen.inbox') }}" class="notification-bell">
                 🔔
                 @php
                     $unseenCount = \App\Models\InAppNotification::forCitizen(Auth::id())->unseen()->count();
                 @endphp
                 @if($unseenCount > 0)
-                <span style="position: absolute; top: -8px; right: -8px; background: #e53e3e; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                <span class="notification-badge">
                     {{ $unseenCount }}
                 </span>
                 @endif

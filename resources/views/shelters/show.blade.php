@@ -9,28 +9,31 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #0D1326;
+            color: #E4E8F5;
         }
         .header {
-            background-color: #27ae60;
+            background-color: #091F57;
             color: white;
             padding: 1rem;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         .nav {
-            background-color: #2ecc71;
+            background-color: #091F57;
             padding: 0.5rem;
             text-align: center;
         }
         .nav a {
-            color: white;
+            color: #E4E8F5;
             text-decoration: none;
             margin: 0 1rem;
             padding: 0.5rem 1rem;
             border-radius: 4px;
+            transition: all 0.3s;
         }
         .nav a:hover {
-            background-color: #27ae60;
+            background-color: rgba(43, 85, 189, 0.3);
         }
         .container {
             max-width: 1000px;
@@ -38,13 +41,14 @@
             padding: 2rem;
         }
         .shelter-detail {
-            background: white;
+            background: #091F57;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             overflow: hidden;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .shelter-header {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #2B55BD, #091F57);
             color: white;
             padding: 2rem;
             text-align: center;
@@ -68,13 +72,14 @@
             margin-bottom: 2rem;
         }
         .info-section {
-            background-color: #f8f9fa;
+            background-color: rgba(43, 85, 189, 0.1);
             padding: 1.5rem;
             border-radius: 8px;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .info-title {
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
             margin-bottom: 1rem;
             font-size: 1.1rem;
         }
@@ -95,13 +100,13 @@
             color: white;
         }
         .capacity-available {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #51cf66, #4cbb5e);
         }
         .capacity-nearly-full {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background: linear-gradient(135deg, #ffa94d, #ff9a3d);
         }
         .capacity-full {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
         }
         .capacity-number {
             font-size: 2rem;
@@ -118,7 +123,8 @@
             margin-top: 1rem;
         }
         .status-available {
-            background-color: #27ae60;
+            background-color: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
             color: white;
         }
         .status-nearly-full {

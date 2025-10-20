@@ -11,28 +11,31 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #0D1326;
+            color: #E4E8F5;
         }
         .header {
-            background-color: #27ae60;
+            background-color: #091F57;
             color: white;
             padding: 1rem;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         .nav {
-            background-color: #2ecc71;
+            background-color: #091F57;
             padding: 0.5rem;
             text-align: center;
         }
         .nav a {
-            color: white;
+            color: #E4E8F5;
             text-decoration: none;
             margin: 0 1rem;
             padding: 0.5rem 1rem;
             border-radius: 4px;
+            transition: all 0.3s;
         }
         .nav a:hover {
-            background-color: #27ae60;
+            background-color: rgba(43, 85, 189, 0.3);
         }
         .container {
             max-width: 1200px;
@@ -46,19 +49,22 @@
             margin-bottom: 2rem;
         }
         .stat-card {
-            background: white;
+            background: #091F57;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-align: center;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
-            color: #27ae60;
+            color: #2B55BD;
+            text-shadow: 0 0 10px rgba(43, 85, 189, 0.3);
         }
         .stat-label {
-            color: #7f8c8d;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-top: 0.5rem;
         }
         .shelters-grid {
@@ -67,33 +73,39 @@
             gap: 1.5rem;
         }
         .shelter-card {
-            background: white;
+            background: #091F57;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             overflow: hidden;
             border-left: 4px solid;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .shelter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(43, 85, 189, 0.3);
         }
         .shelter-card.available {
-            border-left-color: #27ae60;
+            border-left-color: #51cf66;
         }
         .shelter-card.nearly-full {
-            border-left-color: #f39c12;
+            border-left-color: #ffa94d;
         }
         .shelter-card.full {
-            border-left-color: #e74c3c;
+            border-left-color: #ff6b6b;
         }
         .shelter-header {
             padding: 1.5rem;
-            border-bottom: 1px solid #ecf0f1;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
         }
         .shelter-name {
             font-size: 1.25rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
             margin-bottom: 0.5rem;
         }
         .shelter-location {
-            color: #7f8c8d;
+            color: #E4E8F5;
+            opacity: 0.7;
             margin-bottom: 1rem;
         }
         .status-badge {
@@ -103,16 +115,16 @@
             font-weight: bold;
         }
         .status-available {
-            background-color: #27ae60;
-            color: white;
+            background-color: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
         }
         .status-nearly-full {
-            background-color: #f39c12;
-            color: white;
+            background-color: rgba(255, 169, 77, 0.2);
+            color: #ffa94d;
         }
         .status-full {
-            background-color: #e74c3c;
-            color: white;
+            background-color: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
         }
         .shelter-body {
             padding: 1.5rem;
@@ -121,9 +133,10 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
+            color: #E4E8F5;
         }
         .capacity-bar {
-            background-color: #ecf0f1;
+            background-color: rgba(43, 85, 189, 0.2);
             height: 8px;
             border-radius: 4px;
             overflow: hidden;
@@ -134,13 +147,13 @@
             transition: width 0.3s ease;
         }
         .capacity-fill.available {
-            background-color: #27ae60;
+            background-color: #51cf66;
         }
         .capacity-fill.nearly-full {
-            background-color: #f39c12;
+            background-color: #ffa94d;
         }
         .capacity-fill.full {
-            background-color: #e74c3c;
+            background-color: #ff6b6b;
         }
         .facilities {
             display: flex;
@@ -149,8 +162,8 @@
             margin-bottom: 1rem;
         }
         .facility-tag {
-            background-color: #3498db;
-            color: white;
+            background-color: rgba(43, 85, 189, 0.3);
+            color: #E4E8F5;
             padding: 0.25rem 0.5rem;
             border-radius: 12px;
             font-size: 0.75rem;
@@ -165,33 +178,49 @@
             text-decoration: none;
             font-size: 0.9rem;
             text-align: center;
+            transition: all 0.3s;
         }
         .btn-primary {
-            background-color: #3498db;
+            background-color: #2B55BD;
             color: white;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #3d6fd4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 85, 189, 0.5);
         }
         .btn-secondary {
-            background-color: #95a5a6;
-            color: white;
+            background-color: rgba(43, 85, 189, 0.3);
+            color: #E4E8F5;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(43, 85, 189, 0.5);
         }
         .back-link {
-            color: #27ae60;
+            color: #2B55BD;
             text-decoration: none;
             margin-bottom: 1rem;
             display: inline-block;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: #3d6fd4;
+            text-decoration: underline;
         }
         
         /* Map Styles */
         .map-container {
-            background: white;
+            background: #091F57;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 2rem;
             overflow: hidden;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         
         .map-header {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, #2B55BD, #091F57);
             color: white;
             padding: 1.5rem;
             text-align: center;
@@ -203,9 +232,9 @@
         }
         
         .map-controls {
-            background: #f8f9fa;
+            background: rgba(43, 85, 189, 0.1);
             padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
             display: flex;
             gap: 1rem;
             align-items: center;
@@ -220,13 +249,15 @@
         
         .map-filter label {
             font-weight: 600;
-            color: #495057;
+            color: #E4E8F5;
         }
         
         .map-filter select {
             padding: 0.5rem;
-            border: 1px solid #ced4da;
+            border: 1px solid rgba(43, 85, 189, 0.4);
             border-radius: 4px;
+            background-color: #0D1326;
+            color: #E4E8F5;
         }
         
         #shelter-map {
@@ -243,9 +274,9 @@
         
         .toggle-btn {
             padding: 0.75rem 1.5rem;
-            border: 2px solid #3498db;
-            background: white;
-            color: #3498db;
+            border: 2px solid #2B55BD;
+            background: rgba(43, 85, 189, 0.1);
+            color: #E4E8F5;
             border-radius: 25px;
             text-decoration: none;
             font-weight: 600;
@@ -253,22 +284,27 @@
         }
         
         .toggle-btn.active {
-            background: #3498db;
+            background: #2B55BD;
             color: white;
         }
         
         .toggle-btn:hover {
-            background: #2980b9;
+            background: #2B55BD;
             color: white;
-            border-color: #2980b9;
+            border-color: #3d6fd4;
         }
         
         .legend {
-            background: white;
+            background: #091F57;
             padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 2rem;
+            border: 1px solid rgba(43, 85, 189, 0.2);
+        }
+        
+        .legend h4 {
+            color: #E4E8F5;
         }
         
         .legend-item {
@@ -276,6 +312,7 @@
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 0.5rem;
+            color: #E4E8F5;
         }
         
         .legend-marker {
@@ -287,19 +324,23 @@
         }
         
         .legend-marker.available {
-            background: #27ae60;
+            background: #51cf66;
         }
         
         .legend-marker.nearly-full {
-            background: #f39c12;
+            background: #ffa94d;
         }
         
         .legend-marker.full {
-            background: #e74c3c;
+            background: #ff6b6b;
         }
         
         .legend-marker.inactive {
             background: #95a5a6;
+        }
+        
+        h2, h3 {
+            color: #E4E8F5;
         }
     </style>
 </head>

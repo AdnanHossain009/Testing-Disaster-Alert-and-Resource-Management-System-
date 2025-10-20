@@ -12,36 +12,41 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: #0D1326;
             min-height: 100vh;
+            color: #E4E8F5;
         }
         .header {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
+            background: #091F57;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
         .header h1 {
-            color: #2d3748;
+            color: #E4E8F5;
             font-size: 1.8rem;
         }
         .user-info {
-            color: #4a5568;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-right: 1rem;
         }
         .logout-btn {
-            background: #e53e3e;
+            background: #ff6b6b;
             color: white;
             padding: 0.5rem 1rem;
             text-decoration: none;
             border-radius: 5px;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            font-weight: 500;
         }
         .logout-btn:hover {
-            background: #c53030;
+            background: #ff8787;
+            transform: translateY(-2px);
         }
         .container {
             max-width: 1200px;
@@ -54,27 +59,43 @@
             gap: 2rem;
             margin-top: 2rem;
         }
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .card {
-            background: white;
+            background: #091F57;
             border-radius: 10px;
             padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .card h3 {
-            color: #2d3748;
+            color: #E4E8F5;
             margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        .card h4 {
+            color: #E4E8F5;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            color: #E4E8F5;
+            opacity: 0.9;
+            line-height: 1.6;
         }
         .shelter-item {
             padding: 1rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(43, 85, 189, 0.3);
             margin-bottom: 1rem;
             border-radius: 5px;
-            background: #f7fafc;
+            background: rgba(43, 85, 189, 0.1);
         }
         .task-item {
             padding: 0.75rem;
-            border-left: 4px solid #48bb78;
-            background: #f0fff4;
+            border-left: 4px solid #51cf66;
+            background: rgba(81, 207, 102, 0.1);
             margin-bottom: 0.5rem;
             border-radius: 0 5px 5px 0;
             display: flex;
@@ -82,22 +103,26 @@
             align-items: center;
         }
         .btn {
-            background: #48bb78;
-            color: white;
+            background: #51cf66;
+            color: #091F57;
             padding: 0.5rem 1rem;
             text-decoration: none;
             border-radius: 5px;
             display: inline-block;
-            transition: background 0.3s;
+            transition: all 0.3s;
             font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
         }
         .btn:hover {
-            background: #38a169;
+            background: #69db7c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.5);
         }
-        .status-active { color: #48bb78; font-weight: bold; }
-        .occupancy-high { color: #e53e3e; }
-        .occupancy-medium { color: #ed8936; }
-        .occupancy-low { color: #48bb78; }
+        .status-active { color: #51cf66; font-weight: bold; text-shadow: 0 1px 3px rgba(81, 207, 102, 0.3); }
+        .occupancy-high { color: #ff6b6b; font-weight: bold; }
+        .occupancy-medium { color: #ffa94d; font-weight: bold; }
+        .occupancy-low { color: #51cf66; }
     </style>
 </head>
 <body>

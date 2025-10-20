@@ -10,19 +10,20 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0D1326;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .login-container {
-            background: white;
+            background: #091F57;
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 400px;
+            border: 1px solid rgba(43, 85, 189, 0.3);
         }
         .login-header {
             text-align: center;
@@ -31,11 +32,12 @@
         .login-title {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
             margin-bottom: 0.5rem;
         }
         .login-subtitle {
-            color: #7f8c8d;
+            color: #E4E8F5;
+            opacity: 0.7;
             font-size: 0.9rem;
         }
         .form-group {
@@ -45,19 +47,21 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
         }
         .form-input {
             width: 100%;
             padding: 0.75rem;
-            border: 2px solid #ddd;
+            border: 2px solid rgba(43, 85, 189, 0.4);
             border-radius: 6px;
             font-size: 1rem;
             box-sizing: border-box;
+            background-color: #0D1326;
+            color: #E4E8F5;
         }
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2B55BD;
         }
         .btn {
             width: 100%;
@@ -68,47 +72,55 @@
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 1rem;
+            transition: all 0.3s;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2B55BD;
             color: white;
+            box-shadow: 0 4px 12px rgba(43, 85, 189, 0.4);
         }
         .btn-primary:hover {
-            opacity: 0.9;
+            background-color: #3d6fd4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(43, 85, 189, 0.6);
         }
         .demo-accounts {
-            background-color: #f8f9fa;
+            background-color: rgba(43, 85, 189, 0.1);
             border-radius: 6px;
             padding: 1rem;
             margin: 1rem 0;
             font-size: 0.9rem;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .demo-account {
             margin-bottom: 0.5rem;
             padding: 0.5rem;
-            background: white;
+            background: rgba(43, 85, 189, 0.15);
             border-radius: 4px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid #2B55BD;
+            color: #E4E8F5;
         }
         .register-link {
             text-align: center;
             margin-top: 1rem;
         }
         .register-link a {
-            color: #667eea;
+            color: #2B55BD;
             text-decoration: none;
             font-weight: bold;
+            transition: color 0.3s;
         }
         .register-link a:hover {
+            color: #3d6fd4;
             text-decoration: underline;
         }
         .emergency-notice {
-            background-color: #fdf2f2;
-            border: 1px solid #e74c3c;
+            background-color: rgba(255, 107, 107, 0.15);
+            border: 1px solid #ff6b6b;
             border-radius: 6px;
             padding: 1rem;
             margin-bottom: 1rem;
-            color: #721c24;
+            color: #ff6b6b;
             text-align: center;
         }
         .back-link {
@@ -116,13 +128,17 @@
             margin-bottom: 1rem;
         }
         .back-link a {
-            color: #667eea;
+            color: #2B55BD;
             text-decoration: none;
+            transition: color 0.3s;
+        }
+        .back-link a:hover {
+            color: #3d6fd4;
         }
         .error-message {
-            background-color: #fdf2f2;
-            border: 1px solid #e74c3c;
-            color: #721c24;
+            background-color: rgba(255, 107, 107, 0.15);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
             padding: 0.75rem;
             border-radius: 4px;
             margin-bottom: 1rem;

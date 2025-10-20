@@ -7,30 +7,20 @@
     <title>Admin Notifications - Disaster Alert System</title>
     @include('admin.partials.dark-theme-styles')
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
+        /* Page-specific overrides for inbox */
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 2rem 1rem;
         }
 
         .header {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .header-top {
@@ -38,32 +28,37 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .header-title {
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .header-title h1 {
             font-size: 2rem;
-            color: #2d3748;
+            color: #E4E8F5;
             font-weight: 600;
         }
 
         .unseen-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2B55BD 0%, #3d6fd4 100%);
             color: white;
             padding: 0.4rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
         }
 
         .header-actions {
             display: flex;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -78,24 +73,25 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2B55BD 0%, #3d6fd4 100%);
             color: white;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(43, 85, 189, 0.5);
         }
 
         .btn-outline {
-            background: white;
-            border: 2px solid #e2e8f0;
-            color: #4a5568;
+            background: transparent;
+            border: 2px solid rgba(43, 85, 189, 0.4);
+            color: #E4E8F5;
         }
 
         .btn-outline:hover {
-            border-color: #667eea;
-            color: #667eea;
+            border-color: #2B55BD;
+            background: rgba(43, 85, 189, 0.1);
         }
 
         .stats-grid {
@@ -105,21 +101,24 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+            background: linear-gradient(135deg, #091F57 0%, #0D1326 100%);
             padding: 1.25rem;
             border-radius: 12px;
-            border: 2px solid #e2e8f0;
+            border: 1px solid rgba(43, 85, 189, 0.2);
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .stat-card:hover {
-            border-color: #667eea;
+            border-color: #2B55BD;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(43, 85, 189, 0.4);
         }
 
         .stat-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-bottom: 0.5rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -128,15 +127,17 @@
         .stat-value {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #2B55BD;
+            text-shadow: 0 2px 4px rgba(43, 85, 189, 0.3);
         }
 
         .filters {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .filter-tabs {
@@ -148,8 +149,8 @@
         .filter-tab {
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
-            background: #f7fafc;
-            color: #4a5568;
+            background: rgba(43, 85, 189, 0.1);
+            color: #E4E8F5;
             border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -158,25 +159,27 @@
         }
 
         .filter-tab:hover {
-            background: #edf2f7;
+            background: rgba(43, 85, 189, 0.2);
         }
 
         .filter-tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2B55BD 0%, #3d6fd4 100%);
             color: white;
             border-color: transparent;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.4);
         }
 
         .notifications-list {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .notification-item {
             padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
             display: flex;
             gap: 1.25rem;
             align-items: start;
@@ -189,12 +192,12 @@
         }
 
         .notification-item:hover {
-            background: #f7fafc;
+            background: rgba(43, 85, 189, 0.1);
         }
 
         .notification-item.unseen {
-            background: linear-gradient(90deg, #f0f4ff 0%, #ffffff 100%);
-            border-left: 4px solid #667eea;
+            background: linear-gradient(90deg, rgba(43, 85, 189, 0.15) 0%, rgba(43, 85, 189, 0.05) 100%);
+            border-left: 4px solid #2B55BD;
         }
 
         .notification-icon {
@@ -217,23 +220,26 @@
             justify-content: space-between;
             align-items: start;
             margin-bottom: 0.5rem;
+            gap: 1rem;
         }
 
         .notification-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #2d3748;
+            color: #E4E8F5;
             margin-bottom: 0.25rem;
         }
 
         .notification-time {
             font-size: 0.85rem;
-            color: #a0aec0;
+            color: #E4E8F5;
+            opacity: 0.7;
             white-space: nowrap;
         }
 
         .notification-message {
-            color: #4a5568;
+            color: #E4E8F5;
+            opacity: 0.9;
             line-height: 1.6;
             margin-bottom: 0.75rem;
         }
@@ -242,14 +248,15 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .notification-type {
             font-size: 0.8rem;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
-            background: #edf2f7;
-            color: #4a5568;
+            background: rgba(43, 85, 189, 0.2);
+            color: #E4E8F5;
             text-transform: capitalize;
         }
 
@@ -257,8 +264,8 @@
             font-size: 0.85rem;
             padding: 0.4rem 1rem;
             background: transparent;
-            border: 1px solid #e2e8f0;
-            color: #667eea;
+            border: 1px solid rgba(43, 85, 189, 0.4);
+            color: #2B55BD;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;

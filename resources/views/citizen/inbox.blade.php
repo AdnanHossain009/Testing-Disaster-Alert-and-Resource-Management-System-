@@ -15,9 +15,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: #0D1326;
             min-height: 100vh;
             padding: 2rem;
+            color: #E4E8F5;
         }
 
         .container {
@@ -26,11 +27,12 @@
         }
 
         .header {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .header-top {
@@ -48,17 +50,18 @@
 
         .header-title h1 {
             font-size: 2rem;
-            color: #2d3748;
+            color: #E4E8F5;
             font-weight: 600;
         }
 
         .unseen-badge {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #2B55BD, #3d6fd4);
             color: white;
             padding: 0.4rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
         }
 
         .header-actions {
@@ -78,24 +81,27 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: #2B55BD;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+            background-color: #3d6fd4;
+            box-shadow: 0 6px 20px rgba(43, 85, 189, 0.5);
         }
 
         .btn-outline {
-            background: white;
-            border: 2px solid #e2e8f0;
-            color: #4a5568;
+            background: rgba(43, 85, 189, 0.1);
+            border: 2px solid rgba(43, 85, 189, 0.4);
+            color: #E4E8F5;
         }
 
         .btn-outline:hover {
-            border-color: #43e97b;
-            color: #43e97b;
+            border-color: #2B55BD;
+            color: #2B55BD;
+            background: rgba(43, 85, 189, 0.2);
         }
 
         .stats-grid {
@@ -105,21 +111,23 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+            background: linear-gradient(135deg, #091F57, #0D1326);
             padding: 1.25rem;
             border-radius: 12px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid rgba(43, 85, 189, 0.2);
             transition: all 0.3s ease;
         }
 
         .stat-card:hover {
-            border-color: #43e97b;
+            border-color: #2B55BD;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 85, 189, 0.3);
         }
 
         .stat-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-bottom: 0.5rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -128,15 +136,17 @@
         .stat-value {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #2B55BD;
+            text-shadow: 0 0 10px rgba(43, 85, 189, 0.3);
         }
 
         .filters {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .filter-tabs {
@@ -148,8 +158,8 @@
         .filter-tab {
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
-            background: #f7fafc;
-            color: #4a5568;
+            background: rgba(43, 85, 189, 0.1);
+            color: #E4E8F5;
             border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -158,25 +168,27 @@
         }
 
         .filter-tab:hover {
-            background: #edf2f7;
+            background: rgba(43, 85, 189, 0.2);
         }
 
         .filter-tab.active {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #2B55BD, #3d6fd4);
             color: white;
             border-color: transparent;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.4);
         }
 
         .notifications-list {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .notification-item {
             padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
             display: flex;
             gap: 1.25rem;
             align-items: start;
@@ -189,12 +201,12 @@
         }
 
         .notification-item:hover {
-            background: #f7fafc;
+            background: rgba(43, 85, 189, 0.1);
         }
 
         .notification-item.unseen {
-            background: linear-gradient(90deg, #f0fff4 0%, #ffffff 100%);
-            border-left: 4px solid #43e97b;
+            background: linear-gradient(90deg, rgba(43, 85, 189, 0.15), rgba(43, 85, 189, 0.05));
+            border-left: 4px solid #2B55BD;
         }
 
         .notification-icon {
@@ -222,18 +234,20 @@
         .notification-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #2d3748;
+            color: #E4E8F5;
             margin-bottom: 0.25rem;
         }
 
         .notification-time {
             font-size: 0.85rem;
-            color: #a0aec0;
+            color: #E4E8F5;
+            opacity: 0.7;
             white-space: nowrap;
         }
 
         .notification-message {
-            color: #4a5568;
+            color: #E4E8F5;
+            opacity: 0.9;
             line-height: 1.6;
             margin-bottom: 0.75rem;
         }
@@ -248,8 +262,8 @@
             font-size: 0.8rem;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
-            background: #edf2f7;
-            color: #4a5568;
+            background: rgba(43, 85, 189, 0.2);
+            color: #E4E8F5;
             text-transform: capitalize;
         }
 
@@ -257,23 +271,24 @@
             font-size: 0.85rem;
             padding: 0.4rem 1rem;
             background: transparent;
-            border: 1px solid #e2e8f0;
-            color: #43e97b;
+            border: 1px solid rgba(43, 85, 189, 0.4);
+            color: #2B55BD;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .btn-mark-read:hover {
-            background: #43e97b;
+            background: #2B55BD;
             color: white;
-            border-color: #43e97b;
+            border-color: #2B55BD;
         }
 
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: #a0aec0;
+            color: #E4E8F5;
+            opacity: 0.7;
         }
 
         .empty-state-icon {
@@ -283,21 +298,22 @@
 
         .empty-state-text {
             font-size: 1.25rem;
-            color: #4a5568;
+            color: #E4E8F5;
         }
 
         .pagination {
-            background: white;
+            background: #091F57;
             border-radius: 16px;
             padding: 1.5rem;
             margin-top: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             display: flex;
             justify-content: center;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
 
         .success-message {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #51cf66, #4cbb5e);
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 12px;

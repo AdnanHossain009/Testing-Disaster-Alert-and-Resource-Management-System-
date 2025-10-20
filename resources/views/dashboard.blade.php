@@ -14,32 +14,35 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #0D1326;
+            color: #E4E8F5;
         }
 
         .header {
-            background-color: #2c3e50;
+            background-color: #091F57;
             color: white;
             padding: 1rem;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .nav {
-            background-color: #34495e;
+            background-color: #091F57;
             padding: 0.5rem;
             text-align: center;
         }
 
         .nav a {
-            color: white;
+            color: #E4E8F5;
             text-decoration: none;
             margin: 0 1rem;
             padding: 0.5rem 1rem;
             border-radius: 4px;
+            transition: all 0.3s;
         }
 
         .nav a:hover {
-            background-color: #5d6d7e;
+            background-color: rgba(43, 85, 189, 0.3);
         }
 
         .container {
@@ -57,31 +60,51 @@
 
 
         .stat-card {
-            background: white;
+            background: #091F57;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-align: center;
+            border: 1px solid rgba(43, 85, 189, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(43, 85, 189, 0.3);
         }
 
 
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #2B55BD;
+            text-shadow: 0 0 10px rgba(43, 85, 189, 0.3);
         }
 
 
         .stat-label {
-            color: #7f8c8d;
+            color: #E4E8F5;
+            opacity: 0.9;
             margin-top: 0.5rem;
         }
 
         .alerts-section {
-            background: white;
+            background: #091F57;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 1px solid rgba(43, 85, 189, 0.2);
+        }
+
+        .alerts-section h3 {
+            color: #E4E8F5;
+            margin-top: 0;
+        }
+
+        .alerts-section p {
+            color: #E4E8F5;
+            opacity: 0.8;
         }
 
         .alert-item {
@@ -90,7 +113,12 @@
             align-items: center;
             
             padding: 1rem;
-            border-bottom: 1px solid #ecf0f1;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
+            transition: all 0.3s;
+        }
+
+        .alert-item:hover {
+            background-color: rgba(43, 85, 189, 0.1);
         }
 
 
@@ -98,35 +126,74 @@
             border-bottom: none;
         }
 
+        .alert-item strong {
+            color: #E4E8F5;
+        }
+
+        .alert-item small {
+            color: #E4E8F5;
+            opacity: 0.7;
+        }
+
 
         .severity-high {
-            background-color: #e74c3c;
-            color: white;
+            background-color: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .severity-critical {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
 
         .severity-medium {
-            background-color: #f39c12;
-            color: white;
+            background-color: rgba(255, 169, 77, 0.2);
+            color: #ffa94d;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
-
             font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .severity-low {
+            background-color: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
 
         .view-all-btn {
-            background-color: #3498db;
+            background-color: #2B55BD;
             color: white;
             padding: 0.75rem 1.5rem;
-
             text-decoration: none;
             border-radius: 4px;
             display: inline-block;
             margin-top: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(43, 85, 189, 0.3);
+        }
+
+        .view-all-btn:hover {
+            background-color: #3d6fd4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 85, 189, 0.5);
+        }
+
+        h2 {
+            color: #E4E8F5;
         }
     </style>
 
