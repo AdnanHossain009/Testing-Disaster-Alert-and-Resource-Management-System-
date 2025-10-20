@@ -12,3 +12,8 @@ Artisan::command('inspire', function () {
 Schedule::command('requests:auto-assign')->everyFiveMinutes()
     ->name('Auto-assign pending requests')
     ->description('Automatically assign pending help requests when admin is inactive');
+
+// Schedule weather alert checks to run every hour
+Schedule::command('weather:check')->hourly()
+    ->name('Check weather alerts')
+    ->description('Check weather conditions and create alerts for dangerous weather');
