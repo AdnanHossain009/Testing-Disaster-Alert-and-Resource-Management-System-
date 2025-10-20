@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom middleware aliases
         $middleware->alias([
             'nocache' => \App\Http\Middleware\NoCacheMiddleware::class,
+            'track.admin' => \App\Http\Middleware\TrackAdminActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

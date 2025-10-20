@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Disaster Alert System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0D1326;
+            color: #E4E8F5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .offline-icon {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #E4E8F5;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: rgba(228, 232, 245, 0.8);
+            line-height: 1.6;
+        }
+
+        .status-box {
+            background: #091F57;
+            border: 2px solid rgba(43, 85, 189, 0.4);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.3);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #E4E8F5;
+        }
+
+        .status-value {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #2B55BD;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #3d6fd4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(43, 85, 189, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(43, 85, 189, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(43, 85, 189, 0.4);
+        }
+
+        .help-text {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: rgba(228, 232, 245, 0.6);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(228, 232, 245, 0.3);
+            border-radius: 50%;
+            border-top-color: #2B55BD;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #51cf66;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="connection-status">🟢 Back Online!</div>
+
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        
+        <h1>You're Offline</h1>
+        <p>
+            It looks like you've lost your internet connection. 
+            Don't worry, you can still view cached alerts and shelters.
+        </p>
+
+        <div class="status-box">
+            <div class="status-item">
+                <span class="status-label">Connection Status</span>
+                <span class="status-value" id="status-text">Offline</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Last Updated</span>
+                <span class="status-value" id="last-updated">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Cached Data Available</span>
+                <span class="status-value" id="cached-status">
+                    <div class="spinner"></div>
+                </span>
+            </div>
+        </div>
+
+        <div>
+            <a href="/dashboard" class="btn">View Cached Dashboard</a>
+            <a href="/alerts" class="btn btn-secondary">View Cached Alerts</a>
+        </div>
+
+        <button onclick="checkConnection()" class="btn btn-secondary" style="margin-top: 20px;">
+            🔄 Try Again
+        </button>
+
+        <p class="help-text">
+            💡 <strong>Tip:</strong> Cached data will automatically sync when you're back online.
+            Emergency features remain available offline.
+        </p>
+    </div>
+
+    <script>
+        // Check connection status
+        function updateConnectionStatus() {
+            const statusText = document.getElementById('status-text');
+            const statusNotification = document.getElementById('connection-status');
+            
+            if (navigator.onLine) {
+                statusText.textContent = 'Online';
+                statusText.style.color = '#51cf66';
+                statusNotification.style.display = 'block';
+                statusNotification.style.background = '#51cf66';
+                statusNotification.textContent = '🟢 Back Online!';
+                
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 2000);
+            } else {
+                statusText.textContent = 'Offline';
+                statusText.style.color = '#ff6b6b';
+            }
+        }
+
+        function checkConnection() {
+            updateConnectionStatus();
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                alert('Still offline. Please check your internet connection.');
+            }
+        }
+
+        // Check for cached data
+        async function checkCachedData() {
+            const cachedStatus = document.getElementById('cached-status');
+            
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    if (cacheNames.length > 0) {
+                        cachedStatus.innerHTML = '✅ Available';
+                        cachedStatus.style.color = '#51cf66';
+                    } else {
+                        cachedStatus.innerHTML = '❌ Not Available';
+                        cachedStatus.style.color = '#ff6b6b';
+                    }
+                } else {
+                    cachedStatus.innerHTML = '❌ Not Supported';
+                    cachedStatus.style.color = '#ffa94d';
+                }
+            } catch (error) {
+                cachedStatus.innerHTML = '❌ Error';
+                cachedStatus.style.color = '#ff6b6b';
+            }
+        }
+
+        // Update last updated time
+        function updateLastUpdated() {
+            const lastUpdated = document.getElementById('last-updated');
+            const now = new Date();
+            lastUpdated.textContent = now.toLocaleTimeString();
+        }
+
+        // Listen for online/offline events
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Initial checks
+        updateConnectionStatus();
+        checkCachedData();
+        updateLastUpdated();
+
+        // Update time every second
+        setInterval(updateLastUpdated, 1000);
+    </script>
+</body>
+</html>
