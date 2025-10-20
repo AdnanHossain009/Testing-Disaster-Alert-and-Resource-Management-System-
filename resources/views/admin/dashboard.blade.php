@@ -8,68 +8,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Admin Dashboard - Disaster Alert System</title>
+    @include('admin.partials.dark-theme-styles')
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        .header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header-left h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .user-info {
-            color: #bdc3c7;
-        }
-        .logout-btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .nav {
-            background-color: #34495e;
-            padding: 0.5rem 0;
-        }
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            gap: 2rem;
-            padding: 0 1rem;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-        }
-        .nav a:hover, .nav a.active {
-            background-color: #2c3e50;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
+        /* Page-specific overrides - kept minimal as dark theme handles most styling */
         .welcome-section {
-            background: white;
+            background: #091F57;
             padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -77,70 +20,61 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+        .welcome-section h2 {
+            color: #E4E8F5;
         }
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-            border-left: 4px solid;
+        .welcome-section p {
+            color: #E4E8F5;
+            opacity: 0.9;
         }
         .stat-card.alerts {
-            border-left-color: #e74c3c;
+            border-left-color: #ff6b6b;
         }
         .stat-card.shelters {
-            border-left-color: #27ae60;
+            border-left-color: #51cf66;
         }
         .stat-card.requests {
-            border-left-color: #3498db;
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
+            border-left-color: #4ecdc4;
         }
         .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 2rem;
         }
-        .activity-feed {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
-        .quick-actions {
-            background: white;
+        .activity-feed, .quick-actions {
+            background: #091F57;
             padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         .section-title {
             font-size: 1.2rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #ecf0f1;
+            border-bottom: 2px solid rgba(43, 85, 189, 0.3);
         }
         .activity-item {
             display: flex;
             align-items: center;
             padding: 1rem;
-            border-bottom: 1px solid #ecf0f1;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
             gap: 1rem;
+            background: rgba(43, 85, 189, 0.05);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
         }
         .activity-icon {
             width: 40px;
@@ -151,30 +85,33 @@
             justify-content: center;
             font-weight: bold;
             color: white;
+            flex-shrink: 0;
         }
-        .activity-icon.high {
-            background-color: #e74c3c;
+        .activity-icon.high, .activity-icon.critical {
+            background-color: #ff6b6b;
         }
         .activity-icon.medium {
-            background-color: #f39c12;
+            background-color: #ffa94d;
         }
         .activity-icon.low {
-            background-color: #3498db;
+            background-color: #51cf66;
         }
         .activity-content {
             flex: 1;
         }
         .activity-message {
             font-weight: bold;
-            color: #2c3e50;
+            color: #E4E8F5;
+            margin-bottom: 0.25rem;
         }
         .activity-time {
             font-size: 0.8rem;
-            color: #7f8c8d;
+            color: #E4E8F5;
+            opacity: 0.7;
         }
         .action-btn {
             display: block;
-            background-color: #3498db;
+            background-color: #2B55BD;
             color: white;
             padding: 0.75rem 1rem;
             text-decoration: none;
@@ -182,23 +119,34 @@
             margin-bottom: 0.5rem;
             text-align: center;
             font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            background-color: #3d6fd4;
+            transform: translateY(-2px);
         }
         .action-btn.primary {
-            background-color: #2c3e50;
+            background-color: #2B55BD;
         }
         .action-btn.danger {
-            background-color: #e74c3c;
+            background-color: #ff6b6b;
         }
         .action-btn.success {
-            background-color: #27ae60;
+            background-color: #51cf66;
+            color: #091F57;
+        }
+        .action-btn.warning {
+            background-color: #ffa94d;
+            color: #091F57;
         }
         .system-status {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
+            background: linear-gradient(135deg, #51cf66, #69db7c);
+            color: #091F57;
             padding: 1rem;
             border-radius: 6px;
             margin-bottom: 1rem;
             text-align: center;
+            font-weight: bold;
         }
     </style>
 </head>

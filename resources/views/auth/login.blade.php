@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - Disaster Alert System</title>
     <style>
         body {
@@ -149,13 +150,13 @@
             </div>
         @endif
 
-        <form action="{{ route('auth.login') }}" method="POST">
+        <form action="{{ route('auth.login') }}" method="POST" id="loginForm">
             @csrf
             
             <div class="form-group">
                 <label class="form-label" for="email">Email Address</label>
                 <input type="email" id="email" name="email" class="form-input" 
-                       placeholder="Enter your email" required>
+                       placeholder="Enter your email" required value="{{ old('email') }}">
             </div>
 
             <div class="form-group">
@@ -164,10 +165,54 @@
                        placeholder="Enter your password" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
                 🔐 Login to System
             </button>
         </form>
+
+        <script>
+            // Prevent 419 errors by refreshing CSRF token and handling form submission
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('loginForm');
+                const loginBtn = document.getElementById('loginBtn');
+                
+                // Refresh CSRF token before form submission
+                form.addEventListener('submit', function(e) {
+                    // Disable button to prevent double submission
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = '🔄 Logging in...';
+                    
+                    // Re-enable after 3 seconds in case of error
+                    setTimeout(() => {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🔐 Login to System';
+                    }, 3000);
+                });
+
+                // Auto-fill demo credentials
+                document.querySelectorAll('.demo-account').forEach(account => {
+                    account.style.cursor = 'pointer';
+                    account.addEventListener('click', function() {
+                        const text = this.textContent;
+                        let email = '';
+                        
+                        if (text.includes('admin@disaster.gov.bd')) {
+                            email = 'admin@disaster.gov.bd';
+                            document.getElementById('password').value = 'admin123';
+                        } else if (text.includes('citizen@example.com')) {
+                            email = 'citizen@example.com';
+                            document.getElementById('password').value = 'citizen123';
+                        } else if (text.includes('relief@disaster.gov.bd')) {
+                            email = 'relief@disaster.gov.bd';
+                            document.getElementById('password').value = 'relief123';
+                        }
+                        
+                        document.getElementById('email').value = email;
+                        document.getElementById('email').focus();
+                    });
+                });
+            });
+        </script>
 
         <!-- Demo Accounts -->
         <div class="demo-accounts">

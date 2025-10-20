@@ -10,72 +10,10 @@
     <title>Admin - Manage Requests</title>
     <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @include('admin.partials.dark-theme-styles')
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
-        .admin-header { background: #2d3748; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .admin-nav { background: #4a5568; padding: 0.5rem 2rem; }
-        .admin-nav a { color: white; text-decoration: none; margin-right: 2rem; padding: 0.5rem 1rem; border-radius: 5px; }
-        .admin-nav a:hover, .admin-nav a.active { background: #2d3748; }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #2d3748; }
-        .stat-label { color: #718096; margin-top: 0.5rem; }
-        .requests-table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .requests-table table { width: 100%; border-collapse: collapse; }
-        .requests-table th, .requests-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .requests-table th { background: #f7fafc; font-weight: 600; }
-        .status-pending { color: #ed8936; font-weight: bold; }
-        .status-assigned { color: #4299e1; font-weight: bold; }
-        .status-completed { color: #48bb78; font-weight: bold; }
-        .priority-critical { color: #e53e3e; font-weight: bold; }
-        .priority-high { color: #ed8936; font-weight: bold; }
-        .priority-medium { color: #4299e1; }
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 0.5rem; }
-        .btn-primary { background: #4299e1; color: white; }
-        .btn-success { background: #48bb78; color: white; }
-        .btn-warning { background: #ed8936; color: white; }
-        .btn-assign { background: #9f7aea; color: white; }
-        .btn-status { background: #38b2ac; color: white; }
-        .bulk-actions { background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .bulk-form { display: flex; gap: 1rem; align-items: center; }
-        .bulk-form select { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 5px; }
-        .request-checkbox { margin-right: 0.5rem; }
-        #select-all { margin-right: 0.5rem; }
-        .emergency-type { background: #e53e3e; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; }
-        .status { padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
-        .status.pending { background: #fed7d7; color: #822727; }
-        .status.assigned { background: #bee3f8; color: #2a4365; }
-        .status.completed { background: #c6f6d5; color: #1a202c; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 15% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 500px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: black; }
-        
-        /* Map Integration Styles */
-        .map-section { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; overflow: hidden; }
-        .map-header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; text-align: center; }
-        .map-header h3 { margin: 0; font-size: 1.5rem; }
-        .map-controls { background: #f8f9fa; padding: 1rem; border-bottom: 1px solid #e9ecef; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-        .map-filter { display: flex; align-items: center; gap: 0.5rem; }
-        .map-filter label { font-weight: 600; color: #495057; }
-        .map-filter select { padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; }
-        #requests-map { height: 400px; width: 100%; }
-        .view-toggle { display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
-        .toggle-btn { padding: 0.75rem 1.5rem; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
-        .toggle-btn.active { background: #667eea; color: white; }
-        .toggle-btn:hover { background: #5a67d8; color: white; border-color: #5a67d8; }
-        .priority-legend { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        .legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-        .legend-marker { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .legend-marker.critical { background: #e53e3e; }
-        .legend-marker.high { background: #ed8936; }
-        .legend-marker.medium { background: #4299e1; }
-        .legend-marker.low { background: #48bb78; }
-        .legend-marker.pending { background: #ecc94b; }
-        .legend-marker.assigned { background: #9f7aea; }
-        .legend-marker.completed { background: #38b2ac; }
+        /* Page-specific minimal overrides */
+        #requests-map { height: 410px; width: 100%; }
     </style>
 </head>
 <body>

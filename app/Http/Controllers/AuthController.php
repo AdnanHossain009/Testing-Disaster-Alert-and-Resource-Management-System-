@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -14,7 +15,15 @@ class AuthController extends Controller
      
     public function showLogin()
     {
-        return view('auth.login');
+        // Clear any existing auth attempts from old sessions
+        session()->forget('auth_attempts');
+        
+        // Add cache control headers to prevent caching of login page
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     
@@ -30,32 +39,47 @@ class AuthController extends Controller
      
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            $user = Auth::user();
-            
-            // redirect based on role
-            switch ($user->role) {
-                case 'admin':
-                    return redirect()->route('admin.dashboard');
-                case 'citizen':
-                    return redirect()->route('citizen.dashboard');
-                case 'relief_worker':
-                    return redirect()->route('relief.dashboard');
-                default:
-                    return redirect()->route('dashboard');
+            if (Auth::attempt($credentials, $request->filled('remember'))) {
+                // Regenerate session to prevent session fixation attacks
+                $request->session()->regenerate();
+                
+                $user = Auth::user();
+                
+                // Store user info in session for easier access
+                $request->session()->put('user_role', $user->role);
+                $request->session()->put('user_name', $user->name);
+                
+                // redirect based on role
+                switch ($user->role) {
+                    case 'admin':
+                        return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, Admin!');
+                    case 'citizen':
+                        return redirect()->intended(route('citizen.dashboard'))->with('success', 'Welcome back!');
+                    case 'relief_worker':
+                        return redirect()->intended(route('relief.dashboard'))->with('success', 'Welcome back, Relief Worker!');
+                    default:
+                        return redirect()->intended(route('dashboard'))->with('success', 'Login successful!');
+                }
             }
-        }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->withInput($request->only('email'));
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return back()->withErrors([
+                'email' => 'An error occurred during login. Please try again.',
+            ])->withInput($request->only('email'));
+        }
     }
 
     

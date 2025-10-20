@@ -10,20 +10,16 @@
     <title>Analytics Dashboard - Disaster Alert System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @include('admin.partials.dark-theme-styles')
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            margin: 0;
-            padding: 0;
-        }
+        /* Page-specific styles - minimal overrides */
         .analytics-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2B55BD 0%, #091F57 100%);
             color: white;
             padding: 30px;
             border-radius: 10px;
@@ -33,10 +29,12 @@
         .header h1 {
             margin: 0 0 10px 0;
             font-size: 2rem;
+            color: #E4E8F5;
         }
         .header p {
             margin: 0;
             opacity: 0.9;
+            color: #E4E8F5;
         }
         .export-buttons {
             float: right;
@@ -44,7 +42,7 @@
         }
         .export-btn {
             background: white;
-            color: #667eea;
+            color: #2B55BD;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
@@ -57,47 +55,19 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stat-icon {
-            font-size: 2rem;
-            float: right;
-        }
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .chart-card {
-            background: white;
-            padding: 25px;
+            background: #091F57;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -111,38 +81,70 @@
             position: relative;
             height: 300px;
         }
+        padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(43, 85, 189, 0.2);
+        }
+        .chart-card h3, .table-card h3 {
+            margin-top: 0;
+            color: #E4E8F5;
+            border-bottom: 2px solid #2B55BD;
+            padding-bottom: 10px;
+        }
         .table-card {
-            background: white;
+            background: #091F57;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-        }
-        .table-card h3 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            border: 1px solid rgba(43, 85, 189, 0.2);
         }
         table {
             width: 100%;
             border-collapse: collapse;
         }
         table th {
-            background: #f8f9fa;
+            background: rgba(43, 85, 189, 0.2);
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #dee2e6;
+            color: #E4E8F5;
+            border-bottom: 2px solid rgba(43, 85, 189, 0.3);
         }
         table td {
             padding: 12px;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid rgba(43, 85, 189, 0.2);
+            color: #E4E8F5;
         }
         table tr:hover {
-            background: #f8f9fa;
+            background: rgba(43, 85, 189, 0.1);
         }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-critical { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        .badge-high { background: rgba(255, 169, 77, 0.2); color: #ffa94d; }
+        .badge-moderate { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
+        .badge-low { background: rgba(81, 207, 102, 0.2); color: #51cf66; }
+        .badge-active { background: rgba(81, 207, 102, 0.2); color: #51cf66; }
+        .badge-pending { background: rgba(255, 169, 77, 0.2); color: #ffa94d; }
+        .badge-completed { background: rgba(81, 207, 102, 0.2); color: #51cf66; }
+        .badge-in-progress { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(43, 85, 189, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2B55BD, #3d6fd4);
         .badge {
             display: inline-block;
             padding: 4px 12px;

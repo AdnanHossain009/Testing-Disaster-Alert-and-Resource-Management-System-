@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assign Request - Emergency Response Admin</title>
+    @include('admin.partials.dark-theme-styles')
     <style>
         * {
             margin: 0;
