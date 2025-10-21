@@ -5,6 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>Disaster Alert Dashboard</title>
 
@@ -257,7 +260,11 @@
                         <div>
                             <strong>{{ $alert['title'] }}</strong>
                             <br>
-                            <small>{{ $alert['created_at'] }}</small>
+                            <small>📍 {{ $alert['location'] }} • 🕒 {{ $alert['created_at'] }}</small>
+                            @if(isset($alert['source']))
+                                <br>
+                                <small>Source: {{ $alert['source'] }}</small>
+                            @endif
                         </div>
 
 

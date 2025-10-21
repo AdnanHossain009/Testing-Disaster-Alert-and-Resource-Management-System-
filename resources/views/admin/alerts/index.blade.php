@@ -277,6 +277,7 @@
                         <th>Type</th>
                         <th>Severity</th>
                         <th>Location</th>
+                        <th>Source</th>
                         <th>Status</th>
                         <th>Created</th>
                         <th>Actions</th>
@@ -290,6 +291,7 @@
                         <td>{{ $alert->type }}</td>
                         <td class="severity-{{ strtolower($alert->severity) }}">{{ $alert->severity }}</td>
                         <td>{{ $alert->location }}</td>
+                        <td>{{ $alert->source ?? 'Manual' }}</td>
                         <td class="status-{{ strtolower($alert->status) }}">{{ $alert->status }}</td>
                         <td>{{ $alert->created_at->format('M d, Y H:i') }}</td>
                         <td>

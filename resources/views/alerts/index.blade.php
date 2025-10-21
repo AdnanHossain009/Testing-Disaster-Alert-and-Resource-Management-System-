@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>All Disaster Alerts</title>
     <style>
         body {
@@ -179,7 +182,9 @@
                         <div class="alert-header">
 
 
-                            <div class="alert-title">{{ $alert['title'] }}</div>
+                            <div class="alert-title">
+                                {{ $alert['title'] }}
+                            </div>
                             <span class="severity-badge severity-{{ strtolower($alert['severity']) }}">
                                 {{ $alert['severity'] }}
                             </span>
@@ -196,6 +201,10 @@
                                 📍 {{ $alert['location'] }}
                                 <br>
                                 🕒 {{ $alert['created_at'] }}
+                                @if(isset($alert['source']))
+                                    <br>
+                                    Source: <strong>{{ $alert['source'] }}</strong>
+                                @endif
                             </div>
 
 

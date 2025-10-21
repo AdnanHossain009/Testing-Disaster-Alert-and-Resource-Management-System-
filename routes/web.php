@@ -8,10 +8,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnalyticsController;
 
 // Public Dashboard route
-Route::get('/', [AlertController::class, 'dashboard'])->name('dashboard');
+Route::get('/', [AlertController::class, 'dashboard'])->name('dashboard')->middleware('nocache');
 
 // Alert routes (public access)
-Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
+Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index')->middleware('nocache');
 Route::get('/alerts/{id}', [AlertController::class, 'show'])->name('alerts.show');
 
 // Shelter routes (public access)

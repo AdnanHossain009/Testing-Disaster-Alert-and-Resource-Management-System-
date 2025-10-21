@@ -73,7 +73,7 @@
         }
         .chart-card h3 {
             margin-top: 0;
-            color: #333;
+            color: #ffffff;
             border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
@@ -88,7 +88,7 @@
         }
         .chart-card h3, .table-card h3 {
             margin-top: 0;
-            color: #E4E8F5;
+            color: #ffffff !important;
             border-bottom: 2px solid #2B55BD;
             padding-bottom: 10px;
         }

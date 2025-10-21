@@ -500,15 +500,17 @@
         }
         
         function highlightRequestRow(requestId) {
-            // Remove existing highlights
+            // Reset all rows
             document.querySelectorAll('tr[data-request-id]').forEach(row => {
                 row.style.backgroundColor = '';
+                row.style.color = '';
             });
             
             // Highlight selected row
             const selectedRow = document.querySelector(`tr[data-request-id="${requestId}"]`);
             if (selectedRow) {
-                selectedRow.style.backgroundColor = '#e3f2fd';
+                selectedRow.style.backgroundColor = '#3f298f';
+                
                 selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
