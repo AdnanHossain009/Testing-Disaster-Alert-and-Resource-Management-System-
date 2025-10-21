@@ -119,7 +119,8 @@ class RequestController extends Controller
             'request_type' => 'required|in:Shelter,Medical,Food,Water,Rescue,Other',
             'description' => 'required|string',
             'people_count' => 'nullable|integer|min:1',
-            'special_needs' => 'nullable|string'
+            'special_needs' => 'nullable|string',
+            'photos.*' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
         $validated['user_id'] = Auth::id() ?? User::where('email', 'guest@emergency.system')->first()->id; // Use guest user for anonymous requests
@@ -130,6 +131,20 @@ class RequestController extends Controller
         $coords = $this->getCoordinatesFromLocation($validated['location']);
         $validated['latitude'] = $coords['lat'];
         $validated['longitude'] = $coords['lng'];
+
+        // Handle photo uploads
+        if ($request->hasFile('photos')) {
+            $photos = [];
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('request-photos', 'public');
+                $photos[] = [
+                    'path' => $path,
+                    'original_name' => $photo->getClientOriginalName(),
+                    'uploaded_at' => now()->toDateTimeString()
+                ];
+            }
+            $validated['media'] = $photos;
+        }
 
         $helpRequest = HelpRequest::create($validated);
 

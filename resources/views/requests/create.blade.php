@@ -180,6 +180,8 @@
     </style>
 </head>
 <body>
+    @include('components.language-switcher')
+    
     <div class="header">
         <h1>🚨 Request Emergency Help</h1>
         <p>Quick access to emergency shelter and assistance</p>
@@ -280,5 +282,20 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // Register Service Worker for PWA and offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

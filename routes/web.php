@@ -6,6 +6,7 @@ use App\Http\Controllers\ShelterController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\LanguageController;
 
 // Public Dashboard route
 Route::get('/', [AlertController::class, 'dashboard'])->name('dashboard')->middleware('nocache');
@@ -30,6 +31,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register');
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
 Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+// Language switcher route
+Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // Role-based dashboard routes
 Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard');

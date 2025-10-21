@@ -204,6 +204,7 @@
 
 
 <body>
+    @include('components.language-switcher')
 
     <div class="header">
         <h1>🚨 Disaster Alert & Resource Management System</h1>

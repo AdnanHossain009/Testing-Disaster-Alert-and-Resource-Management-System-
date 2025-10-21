@@ -81,7 +81,12 @@
             font-weight: bold;
             color: #E4E8F5;
             margin-bottom: 1rem;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+        }
+        .contact-info .info-title {
+            color: #51cf66;
+            font-size: 1.3rem;
+            font-weight: 800;
         }
         .capacity-display {
             text-align: center;
@@ -162,10 +167,20 @@
             margin-right: 0.5rem;
         }
         .contact-info {
-            background-color: #e8f8f5;
+            background-color: rgba(39, 174, 96, 0.15);
             border-left: 4px solid #27ae60;
             padding: 1.5rem;
             margin: 1rem 0;
+            color: #E4E8F5;
+        }
+        .contact-info p {
+            color: #E4E8F5;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+        .contact-info strong {
+            color: #51cf66;
+            font-weight: bold;
         }
         .action-buttons {
             display: flex;
