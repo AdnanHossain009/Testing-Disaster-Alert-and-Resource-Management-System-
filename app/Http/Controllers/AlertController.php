@@ -22,7 +22,7 @@ class AlertController extends Controller
     }
 
     // display a specific alert 
-
+    //finding a specific alert by its id
 
     public function show($id)
     {

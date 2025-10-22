@@ -180,8 +180,6 @@
     </style>
 </head>
 <body>
-    @include('components.language-switcher')
-    
     <div class="header">
         <h1>🚨 Request Emergency Help</h1>
         <p>Quick access to emergency shelter and assistance</p>
